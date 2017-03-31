@@ -167,14 +167,15 @@ based on hosting images in private repositories in DockerHub.
 
 Really the purpose of my proof of concept is not learning the inner gritty details of security around docker containers, instead try to set the ground to prepare a continuos development pipeline using Jenkins. which will be the base of my next bog entry.
 
-# Related links
+# Useful links
+
 + [Using Amazon ECR as Docker registry][1]
 + [A nginx registry proxy][2]
 + [Using Nexus 3 as Docker registry][3]
 + [Nexus 3 image][4]
 + [Securing Jetty via SSL][5]
-[
-1]: http://rancher.com/using-amazon-container-registry-service/
+
+[1]: http://rancher.com/using-amazon-container-registry-service/
 [2]: https://hub.docker.com/r/marvambass/nginx-registry-proxy/
 [3]: http://www.sonatype.org/nexus/2016/06/29/using-nexus-3-as-a-private-docker-registry/
 [4]: https://github.com/sonatype/docker-nexus3
