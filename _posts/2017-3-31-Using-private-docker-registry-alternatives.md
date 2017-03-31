@@ -3,15 +3,13 @@ layout: post
 title: Using private docker registry alternatives!
 ---
 
-# Using private docker registry alternatives
-
 # Summary:
-Running containers within containers and using private registries implie configuration burden and try/error approach.
+Running containers within containers and using private registries implies some configuration burden.
 
 Several options were tried including  using insecure registries, registries proxied by nginx to setup TLS negotiation, and using
 registry images using certs and CA crts.
 
-I will explore the alternatives available and share some instructions that I hope will be useful to someone.
+I will explore the alternatives available and share some instructions that I hope will be useful to someone who faces the same dilemma.
 
 ## 1. Run a private docker registry as docker container
 
@@ -55,9 +53,9 @@ REGISTRY_HTTP_TLS_CERTIFICATE=/tmp/registry/ssl/cert.pem
 
 # location of CA of trusted clients
 REGISTRY_HTTP_TLS_CLIENTCAS_0=/tmp/registry/ssl/ca.pem
-```bash
+```
 
-Inspiration from http://tech.paulcz.net/2016/01/deploying-a-secure-docker-registry/
+Inspiration comes after finnding this post http://tech.paulcz.net/2016/01/deploying-a-secure-docker-registry/
 
 ```bash
 docker run -d --name registry -v /tmp/registry:/opt/registry -p 5000:5000 --restart always --env-file /tmp/registry/config/registry.env registry:2
@@ -67,13 +65,13 @@ docker run -d --name registry -v /tmp/registry:/opt/registry -p 5000:5000 --rest
 
 You need to copy cert files, created in the previous steps
 ```bash
-/tmp/registry/ssl » mkdir -p /tmp/security/external                                                                              mfarache@OEL0043
-/tmp/registry/ssl » cp cert.pem /tmp/security/external                                                                           mfarache@OEL0043
+/tmp/registry/ssl » mkdir -p /tmp/security/external
+/tmp/registry/ssl » cp cert.pem /tmp/security/external
 /tmp/registry/ssl » cp key.pem /tmp/security/external
 
 ```
 
-As we are going to be protecting our registry with simple http auth lets create a htpasswd. That could be done using some fancy docker image but this time I went through the simplest path
+We will be protecting our registry with simple http auth lets create a htpasswd. That could be done using some fancy docker image but this time I went through the simplest path
 
 Visit http://www.htaccesstools.com/htpasswd-generator/
 
@@ -95,7 +93,7 @@ docker run -d -p 443:443 -v /tmp/security/external:/etc/nginx/external --link re
 Once our containers are up and running
 
 ```bash
-/tmp/security/external » docker login https://localhost:443                                                                      mfarache@OEL0043
+/tmp/security/external » docker login https://localhost:443       
 Username: registry
 Password:
 Login Succeeded
@@ -112,6 +110,10 @@ To see that everything works
 Password:
 Login Succeeded
 
+```
+Now we are ready to pick one of our local images (busybox, if you do not have it you should do docker pull busybox first)
+
+```bash
 docker tag busybox dockermau/busybux
 docker push dockermau/busybux
 
@@ -138,13 +140,15 @@ Luckily enough was happy with option 2, so there was not reason to get tied to A
 
 While using a private registry works fine pushing from the host to the container, the problems arise where you want to push images from another container.
 
-Under MAC the main issue found was that was possible to push images using
+Under MAC the main issue found was that was possible to push images from the host
+```
 push localhost:5000/<myimage>
-
+```
 However this was not possible from the container itself
+```
 push registry:5000/<myimage>
+```
+After one day banging my head against the wall , trying every possible alternative or workaround I gave up and went for the simplest solution
+based on hosting images in private repositories in DockerHub.
 
-Eventually the simples solution is based on hosting images in private repositories in DockerHub.
-
-
-Next post will be around setting a continuosu development pipeline using Jenkins.
+Really the purpose of my proof of concept is not learning the inner gritty details of security around docker containers, instead try to set the ground to prepare a continuos development pipeline using Jenkins. which will be the base of my next bog entry.
