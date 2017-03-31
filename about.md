@@ -3,13 +3,10 @@ layout: page
 title: About
 permalink: /about/
 ---
-
-Some information about you!
+Software Techinical architect working for Piksel
 
 ### More Information
-
-A place to include any other types of information that you'd like to include about yourself.
+Hobbies: Run, Guitar, geek stuff
 
 ### Contact me
-
-[email@domain.com](mailto:email@domain.com)
+https://www.linkedin.com/in/mauricio-farache-4536982/
