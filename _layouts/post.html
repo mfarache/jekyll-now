@@ -9,14 +9,7 @@ layout: default
     {{ content }}
   </div>
 
-  <div class="tags1">
-    {% if post.tags.size > 0 %}
-    Tag{% if post.tags.size > 1 %}s{% endif %}:
-    {{ post.tags | sort | join: ", " }}
-    {% endif %}
-  </div>
-
-  <div class="tags2">
+  <div class="tags">
     {% if page.tags.size > 0 %}
     Tag{% if page.tags.size > 1 %}s{% endif %}:
     {{ page.tags | sort | join: ", " }}
