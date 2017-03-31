@@ -148,7 +148,7 @@ To improve speed and reduce times, we can add a Squid cache container that would
 
 ## 4. Using Amazon ECR
 There is a great aritcle [here][1]
-Luckily enough was happy with option 2, so there was not reason to get tied to AWS again. Dockerhub does the job pretty well.
+Luckily enough was happy enough using just standard Docker Hub..  so there was not reason to get tied to AWS again. Dockerhub does the job pretty well.
 
 # Gotchas
 

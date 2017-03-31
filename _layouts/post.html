@@ -9,6 +9,14 @@ layout: default
     {{ content }}
   </div>
 
+  <div class="entry">
+    {% if post.tags.size > 0 %}
+    Tag{% if post.tags.size > 1 %}s{% endif %}:
+    {{ post.tags | sort | join: ", " }}
+    {% endif %}
+  </div>
+
+
   <div class="date">
     Written on {{ page.date | date: "%B %e, %Y" }}
   </div>
