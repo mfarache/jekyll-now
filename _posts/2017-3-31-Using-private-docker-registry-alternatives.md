@@ -2,8 +2,6 @@
 layout: post
 title: Using private docker registry alternatives!
 ---
-
-# Summary:
 Running containers within containers and using private registries implies some configuration burden.
 
 Several options were tried including  using insecure registries, registries proxied by nginx to setup TLS negotiation, and using
