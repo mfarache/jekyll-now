@@ -13,10 +13,10 @@ layout: default
       </div>
 
       <div class="notepad-index-post-tags">
-        {% if page.tags.size > 0 %}
-        Tag{% if page.tags.size > 1 %}s{% endif %}:
-        {{ page.tags | sort | join: ", " }}
-        {% endif %}
+          {% for tag in post.tags %}
+           <a href="{{ site.url }}/categories/index.html#{{ post.tags | cgi_encode }}" title="Other posts from the {{ tag | capitalize }} category">
+             {{ tag | capitalize }}</a>{% unless forloop.last %}&nbsp;{% endunless %}
+          {% endfor %}
       </div>
 
       <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
