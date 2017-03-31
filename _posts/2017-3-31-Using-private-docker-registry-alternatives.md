@@ -1,21 +1,15 @@
-
+---
+layout: post
+title: Using private docker registry alternatives!
+---
 
 # Using private docker registry alternatives
 
 # Summary:
-
-Running containers within containers and using private registries implie configuration burden and try/error approach. While using a private registry works fine pushing from the host to the container, the problems arise where you want to push images from another container.
-
-Under MAC the main issue found was that was possible to push images using
-push localhost:5000/<myimage>
-
-However this was not possible from the container itself
-push registry:5000/<myimage>
+Running containers within containers and using private registries implie configuration burden and try/error approach.
 
 Several options were tried including  using insecure registries, registries proxied by nginx to setup TLS negotiation, and using
 registry images using certs and CA crts.
-
-Eventually the simples solution is based on hosting images in private repositories in DockerHub.
 
 I will explore the alternatives available and share some instructions that I hope will be useful to someone.
 
@@ -140,6 +134,17 @@ There is a great aritcle [here][1]
 Luckily enough was happy with option 2, so there was not reason to get tied to AWS again. Dockerhub does the job pretty well.
 
 
+# Gotchas
+
+While using a private registry works fine pushing from the host to the container, the problems arise where you want to push images from another container.
+
+Under MAC the main issue found was that was possible to push images using
+push localhost:5000/<myimage>
+
+However this was not possible from the container itself
+push registry:5000/<myimage>
+
+Eventually the simples solution is based on hosting images in private repositories in DockerHub.
 
 
 Next post will be around setting a continuosu development pipeline using Jenkins.
