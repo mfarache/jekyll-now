@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Building a CD pipeline with docker and jenkins
---
+---
 
 My objective is prototype  a CD flow with several stages including manual steps before the artifacts are released and deployed to each stage.  In a continuos deployment flow there are several points where QA may need to perform several regression testing or manual tests before signing off a release.
 
