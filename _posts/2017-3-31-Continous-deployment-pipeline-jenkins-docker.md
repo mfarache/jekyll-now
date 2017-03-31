@@ -185,11 +185,11 @@ docker run --rm --privileged alpine hwclock -s
 
 # Useful links
 
-[builder pattern paradigm][1]  
-[Pipeline as Code with Jenkins][2]
-[Docker in docker using Jenkins slaves][3]
-[Why not use docker in docker ][4]
-[Building images with Docker using jenkins pipeline][5]
++ [builder pattern paradigm][1]  
++ [Pipeline as Code with Jenkins][2]
++ [Docker in docker using Jenkins slaves][3]
++ [Why not use docker in docker][4]
++ [Building images with Docker using jenkins pipeline][5]
 
 [1]: http://blog.terranillius.com/post/docker_builder_pattern/
 [2]: https://jenkins.io/solutions/pipeline/
