@@ -30,6 +30,9 @@ SCM > DOCKERHUB  REGISTRY >  ENVIRONMENT > DOCKER PULL IMAGE  > DOCKER run
 
 Once images are in the repository every developer should be able to run exactly the same version as in production via docker compose (as we have  about 9 containers)
 
+![_config.yml]({{ site.baseurl }}/images/DockerWorkflow.png)
+
+
 The new build process should have at least the following stages to prove the typical scenario
 - Checkout code
 - Build code artifacts
@@ -86,7 +89,7 @@ Note: Remember the Jenkinsfile must be in the root of your repository!
 
 My Jenkinsfile contents are:
 
-```
+```javascript
 #!/usr/bin/env groovy
 
 import hudson.model.*
