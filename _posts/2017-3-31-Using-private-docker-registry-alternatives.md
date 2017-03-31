@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Using private docker registry alternatives!
+tags:   [ docker, docker registry, amazon ecr ]
 ---
 Running containers within containers and using private registries implies some configuration issues. Several options were tried including
 + insecure registries
