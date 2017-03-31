@@ -54,8 +54,6 @@ They could be the base of another post about how to use several Jenkins slaves t
 Each embedded container will be responsible only of building our artifact , keeping clean our jenkins master instance.
 There are well known images like mvn3.3.3-jdk-1.8 which incorporates a full containerized JAVA build environment following the new [builder pattern paradigm][1]  
 
-[1]: http://blog.terranillius.com/post/docker_builder_pattern/
-
 For the purpose of the test I chose the pipeline plugin available with Jenkins 2.0
 
 # Pipeline definition
@@ -73,14 +71,12 @@ So you can visit http://localhost:8080 and complete the steps in order ti finish
 
 Be sure the Jenkins pipeline plugin is installed which lets you orchestrate automation, simple or complex. See [Pipeline as Code with Jenkins][2] for more details. As a heads up you can define your pipeline with groovy DSL. Pipelines are executed in nodes. Within each node you can define a set of stage made of steps. For simplicity everything will be run on a single node, but is even possible to configure docker nodes to perform specific steps.
 
-[2]: https://jenkins.io/solutions/pipeline/
-
 Follow the creation of a new job chosing  Pipeline option
 
-I chosed to run a parameterized build so I can reduce build time chosing if we skip test or if we use docker. Not using docker would streamline the pipeline in case we want to skip the steps of building & pushing images.
+I choosed to run a parameterized build so I can reduce build time chosing if we skip test or if we use docker. Not using docker would streamline the pipeline in case we want to skip the steps of building & pushing images.
 
 + Definition: Pipeline from SCM
-+ Chose your favourite SCM settings where you store the code you want to build & release
++ Chose your favorite SCM settings where you store the code you want to build & release
 + Script Path: Jenkinsfile
 
 Note: Remember the Jenkinsfile must be in the root of your repository!
@@ -186,3 +182,17 @@ Docker on Mac runs under a VM with alpine.
 ```
 docker run --rm --privileged alpine hwclock -s         
 ```
+
+# Useful links
+
+[builder pattern paradigm][1]  
+[Pipeline as Code with Jenkins][2]
+[Docker in docker using Jenkins slaves][3]
+[Why not use docker in docker ][4]
+[Building images with Docker using jenkins pipeline][5]
+
+[1]: http://blog.terranillius.com/post/docker_builder_pattern/
+[2]: https://jenkins.io/solutions/pipeline/
+[3]: https://github.com/tehranian/dind-jenkins-slave
+[4]: https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/
+[5]: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
