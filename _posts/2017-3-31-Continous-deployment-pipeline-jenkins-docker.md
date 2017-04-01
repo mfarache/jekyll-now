@@ -8,6 +8,8 @@ My objective is prototype  a CD flow with several stages including manual steps 
 
 We would like to release our code as final images instead of artifacts that are pushed to the environments before a new image is built.
 
+<script src="https://gist.github.com/mfarache/710e3049c2482fbc4708.js"></script>
+
 ## Why?
 Our current release can be improved significantly. The current process involves pulling artifacts from a nexus repository.
 
