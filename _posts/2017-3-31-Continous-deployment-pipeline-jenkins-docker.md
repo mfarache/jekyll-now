@@ -8,8 +8,6 @@ My objective is prototype  a CD flow with several stages including manual steps 
 
 We would like to release our code as final images instead of artifacts that are pushed to the environments before a new image is built.
 
-<script src="https://gist.github.com/mfarache/710e3049c2482fbc4708.js"></script>
-
 ## Why?
 Our current release can be improved significantly. The current process involves pulling artifacts from a nexus repository.
 
@@ -86,88 +84,8 @@ Note: Remember the Jenkinsfile must be in the root of your repository!
 
 My Jenkinsfile contents are:
 
-```javascript
-#!/usr/bin/env groovy
+<script src="https://gist.github.com/mfarache/498cbbb9a81fdced4cdb24fa46e5408e.js"></script>
 
-import hudson.model.*
-import hudson.EnvVars
-import groovy.json.JsonSlurperClassic
-import groovy.json.JsonBuilder
-import groovy.json.JsonOutput
-import java.net.URL
-
-properties([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
-[$class: 'BooleanParameterDefinition', name: 'skipTests', defaultValue: false],
-[$class: 'BooleanParameterDefinition', name: 'skipDocker', defaultValue: false]
-]]])
-
-try {
-node {
-
-def workspace = pwd()+"@script"
-def registryUser ="<YOUR_DOCKER_USERNAME>"
-def registryPassword ="<YOUR_PASSWORD>"
-
-def image = "mock-palm"
-
-stage 'Download Code'  
-
-echo "\u2600 BUILD_URL=${env.BUILD_URL}"
-
-echo "\u2600 workspace=${workspace}"
-
-stage 'Build'
-echo "Building"
-def mvnHome = tool 'M3'
-sh "cd ${workspace} && ${mvnHome}/bin/mvn clean install -DskipTests"
-stage 'Unit Test'
-echo "Unit testing"
-sh "cd ${workspace} && ${mvnHome}/bin/mvn surefire:test"
-
-stage 'Integration Test'
-echo "Integration testing"
-
-stage 'Build Image'
-echo "Docker Build"
-if (Boolean.valueOf(skipDocker)) {
-      echo "Docker build Skipped"
-} else {
-	  sh "cd ${workspace} &&  docker build -t ${image} ."
-}
-
-stage 'Push Image Registry'
-if (Boolean.valueOf(skipDocker)) {
-      echo "Skipped"
-} else {
-   echo "Login as ${registryUser} against registry DockerHub"
-   sh "docker login -u ${registryUser} -p ${registryPassword}"
-   echo "Login sucessful"
-   sh "docker tag ${image} ${registryUser}/${image}"
-   echo "Tagging ${image} within ${registryUser}/${image}"
-   sh "docker push ${registryUser}/${image}"
-   echo "Pushed ${registryUser}/${image}"
-}
-
-stage 'Deploy to DEV'
-echo "Deploy to DEV"
-
-stage 'Deploy to QA'
-echo "Deploy to QA"
-input 'Do you approve deployment to QA?'
-
-stage 'Deploy to PRD'
-echo "Deploy to PRD"
-input 'Do you approve deployment to QA?'
-
-} // node
-} // try end
-catch (exc) {
-/*
-  Your error handling should notify via slack or email
-*/
-}
-
-```
 This is how my pipeline looks like after a succesful build
 
 ![_config.yml]({{ site.baseurl }}/images/JenkinsPipeline.png)
