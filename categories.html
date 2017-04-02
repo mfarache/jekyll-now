@@ -29,17 +29,3 @@ description: "An archive of posts sorted by categories."
     {% endunless %}
   {% endfor %}
 {% endfor %}
-
-<!--<ul class="tag-box inline">
-  {% for tag in globaltags %}
-    {% for post in posts %}
-      {% if post.tags contains tag %}
-      <li>
-        <a href="{{ post.url }}">{{ post.title }}</a>
-        <span class="date">{{ post.date | date: "%B %-d, %Y"  }}</span>
-      </li>
-      {% endif %}
-      {% endfor %}
-  {% endfor %}
-  </ul>
--->
