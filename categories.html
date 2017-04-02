@@ -12,20 +12,5 @@ description: "An archive of posts sorted by categories."
 {% assign globaltags = nil %}
 {% for post in posts %}
   EEEEEOOO <a href="{{ post.url }}">{{ post.title }}</a>
-  {% assign tags = post.tags %}
-  {% if first == true %}
-    First is false
-    {% assign globaltags =  post.tags%}
-    {% assign first = false %}
-      First is false
-  {% endif %}
-  {% for tag in tags %}
-    {{ tag }}
-    {% unless globaltags contains tag %}
-      Adding {{ tag }}
-      {% size = globaltags.size  %}
-      Size is now {{ size }}
-      {% globaltags[size] = tag %}
-    {% endunless %}
-  {% endfor %}
+
 {% endfor %}
