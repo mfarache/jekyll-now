@@ -13,11 +13,5 @@ description: "An archive of posts sorted by categories."
 {% for post in posts %}
   EEEEEOOO1 <a href="{{ post.url }}">{{ post.title }}</a>
   {% assign tags = post.tags %}
-  {% if first == true %}
-    First is false
-    {% assign globaltags =  post.tags %}
-    {% assign first = false %}
-      First is false
-  {% endif %}
   
 {% endfor %}
