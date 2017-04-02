@@ -9,7 +9,6 @@ description: "An archive of posts sorted by categories."
 {% assign posts = site.posts %}
 {% assign first = true %}
 {% assign globaltags = nil %}
-
 {% for post in posts %}
   {% assign tags = post.tags %}
   {% if first == true %}
@@ -17,19 +16,19 @@ description: "An archive of posts sorted by categories."
     {% assign first = false %}
   {% endif %}
   {% for tag in tags %}
-    {{ tag }}
     {% unless globaltags contains tag %}
-      Adding {{ tag }}
      {% assign globaltags = globaltags | concat:tag %}
     {% endunless %}
   {% endfor %}
 {% endfor %}
 
 {% for globaltag in globaltags %}
+  <ul>
   TAG <span>{{ globaltag}}</span>
   {% for post in posts %}
     {% if post.tags contains globaltag %}
-      <a href="{{ post.url }}">{{ post.title }}</a>
+      <li><a href="{{ post.url }}">{{ post.title }}</a></li>
       {% endif %}
   {% endfor %}
+</ul>
 {% endfor %}
