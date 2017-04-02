@@ -9,12 +9,13 @@ layout: default
     {{ content }}
   </div>
 
-  <div class="tags">
-    {% if page.tags.size > 0 %}
-    Tag{% if page.tags.size > 1 %}s{% endif %}:
-    {{ page.tags | sort | join: ", " }}
-    {% endif %}
+  <div class="notepad-index-post-tags">
+      {% for tag in page.tags %}
+       <a href="{{ site.url }}/categories/index.html#{{ tag | capitalize }}" title="Other posts related with {{ tag | capitalize }} ">
+         {{ tag | capitalize }}</a>
+      {% endfor %}
   </div>
+
 
   <div class="date">
     Written on {{ page.date | date: "%B %e, %Y" }}
