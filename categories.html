@@ -6,18 +6,15 @@ title: Category Index
 tags: [Categories]
 description: "An archive of posts sorted by categories."
 ---
-
 {% assign posts = site.posts %}
 {% assign first = true %}
 {% assign globaltags = nil %}
+
 {% for post in posts %}
-  EEEEEOOO <a href="{{ post.url }}">{{ post.title }}</a>
   {% assign tags = post.tags %}
   {% if first == true %}
-    First is false
     {% assign globaltags =  post.tags %}
     {% assign first = false %}
-      First is false
   {% endif %}
   {% for tag in tags %}
     {{ tag }}
@@ -25,5 +22,14 @@ description: "An archive of posts sorted by categories."
       Adding {{ tag }}
      {% assign globaltags = globaltags | concat:tag %}
     {% endunless %}
+  {% endfor %}
+{% endfor %}
+
+{% for globaltag in globaltags %}
+  TAG <span>{{ tag}}</span>
+  {% for post in posts %}
+    {% if post.tags contain globaltag %}
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      {% endif %}
   {% endfor %}
 {% endfor %}
