@@ -28,7 +28,7 @@ description: "An archive of posts sorted by categories."
 {% for globaltag in globaltags %}
   TAG <span>{{ globaltag}}</span>
   {% for post in posts %}
-    {% if post.tags contain globaltag %}
+    {% if post.tags contains globaltag %}
       <a href="{{ post.url }}">{{ post.title }}</a>
       {% endif %}
   {% endfor %}
