@@ -11,6 +11,13 @@ description: "An archive of posts sorted by categories."
 {% assign first = true %}
 {% assign globaltags = nil %}
 {% for post in posts %}
-  EEEEEOOO <a href="{{ post.url }}">{{ post.title }}</a>
-
+  EEEEEOOO1 <a href="{{ post.url }}">{{ post.title }}</a>
+  {% assign tags = post.tags %}
+  {% if first == true %}
+    First is false
+    {% assign globaltags =  post.tags %}
+    {% assign first = false %}
+      First is false
+  {% endif %}
+  
 {% endfor %}
