@@ -8,12 +8,16 @@ description: "An archive of posts sorted by categories."
 ---
 
 {% assign posts = site.posts %}
+{% assign globaltags = nil %}
 {% for post in posts %}
   <a href="{{ post.url }}">{{ post.title }}</a>
   {% assign tags = post.tags %}
   {% for tag in tags %}
     {{ tag }}
-    {% unless post.tags contains tag %} XX 
+    {% unless globaltags contains tag %}
+      Adding {{ tag }}
+      {% size = globaltags.size  %}
+      {% globaltags[size] = tag %}
     {% endunless %}
   {% endfor %}
 {% endfor %}
