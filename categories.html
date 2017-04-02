@@ -9,9 +9,11 @@ description: "An archive of posts sorted by categories."
 
 {% assign posts = site.posts %}
 {% for post in posts %}
+  <a href="{{ post.url }}">{{ post.title }}</a>
   {% assign tags = post.tags %}
   {% for tag in tags %}
-    {% unless post.tags contains tag %}adding {{ tag }}
+    {{ tag }}
+    {% unless post.tags contains tag %} XX 
     {% endunless %}
   {% endfor %}
 {% endfor %}
