@@ -4,19 +4,20 @@ title: Run integration tests using docker and junit
 tags:   [ integration testing, docker, junit ]
 ---
 
-The challenge is being able to add thorough integration testing based on docker on those areas where is not always possible to apply automation.
+In this post I will share the steps that I followed to achieve integration testing that can be launched from your favourite IDE or run locally or in a CI server via maven using palantir Docker compose junit rules.
 
-We have pretty decent acceptance testing based on Arquillian. These acceptance tests are not really a replica of how the artifacts are deployed into production and other stages. In our customer environments (DEV, QA, TRN, PRD) we use docker and we have about 11 containers, some of them are just Spring boot fat jars, others are mule ESB instances and others are Tomcat web apps. The reason is that on Arquillian those artifacts are deployed and run as war files on Jetty/Tomcat web applications and using a inmemory database that is initialized and loaded with data before the execution of our tests begin.
+In our current project we have pretty decent acceptance testing based on Arquillian. However these acceptance tests are not really a replica of how the artifacts are deployed into production and other stages. In our customer environments (DEV, QA, TRN, PRD) we use docker and we have about 11 containers, some of them are just Spring boot fat jars, others are mule ESB instances and others are Tomcat web apps. But our setting in Arquillian are defined to deploy those artifacts as war files on Jetty/Tomcat web applications servers. We also use an in-memory database that is initialized and loaded with data before the execution of our tests begin.
+Its far from ideal as some native ORACLE queries just do not work on HQLDB so we need to tweak things to make it work.
 
 We also have automated tests using Ruby/Cucumber/Gherkin spec that allow us to apply definition of user readable stories.
 
 However our ESB layer (Mule) is craving for improvements! We tried with no luck adding a suite to be part of the Arquillian acceptance test project but was not trivial. We have been using Munit for functional testing but we feel it was not enough as we were missing real integration testing.
 
-In this post I will share the steps that I followed to achieve integration testing that can be launched from your favourite IDE or run locally or in a CI server via maven.
 
 Our integration testing scenario can be summarized as follows
-Third party application ORIGIN push XML messages to a RabbitMQ
-Our Mule ESB layer handle those XML messages, doing validation steps, enriching the information provided by another application ENRICHER, transformation of payload and eventually a message is sent to an application DESTINY
++ Third party application ORIGIN push XML messages to a RabbitMQ
++ Our Mule ESB layer handle those XML messages, doing validation steps, enriching the information provided by another application
++ ENRICHER, transformation of payload and eventually a message is sent to an application DESTINY
 
 This diagram "hyper-simplified" explains the overall flow. Literally tons of things happen in our ESB layer but this is out of scope within this post.
 
@@ -24,9 +25,12 @@ This diagram "hyper-simplified" explains the overall flow. Literally tons of thi
 
 Really I was interested in verifying the behaviour of the ESB to be sure that the output messages sent to DESTINY matches with our expectations based on the message sent by the application ORIGIN.
 
-We are not responsible of ORIGIN nor ENRICHER so those components perfect candidates to be mocked using Wiremock. WireMock is a simulator for HTTP-based APIs. Some might consider it a service virtualization tool or a mock server.
-RabbitMQ must be a real server, as this is our entry point for all the scenario variations.
-DESTINY is our application .... and yes we have it dockerized but relies on another ORACLE container and multiple dataset that must be loaded into the database before test start. As consequence I thought that would be overkilling. I just need to know that messages arrived to DESTINY, what happens next is not really our concern. Someone may argue this is not integration testing and they can be right but as I explained my target was to test the behaviour of Mule as a black box. So I hacked quickly a Spring Boot application  
+Before we go ahead let me add some context about our components
+
++ We are not responsible of ORIGIN nor ENRICHER so those components are perfect candidates to be mocked using Wiremock.
+WireMock is a simulator for HTTP-based APIs. Some might consider it a service virtualization tool or a mock server.
++ RabbitMQ must be a real server, as this is our entry point for all the scenario variations.
++ DESTINY is our application .... and yes we have it dockerized .... but relies on another ORACLE container and multiple dataset that must be loaded into the database before test start. As consequence I thought that would be overkilling. I just need to know that messages arrived to DESTINY, what happens next is not really our concern because we have an awesome acceptance testing on DESTINY covering nearly 95% of the code base. Someone may argue this is not integration testing and they can be right but as I explained my target was to test the behaviour of Mule as a black box. So I hacked quickly a Spring Boot application  
 that allows me to store each request in a inmemory hashmap , so I can query for them within my Junit test. Is dirty and nasty I know but I did not think anything more complex than that ;)
 
 <script src="https://gist.github.com/mfarache/dddc21330a1a602931f9c788c03220e9.js"></script>  
@@ -36,13 +40,12 @@ What if we can launch that using old-fashioned Junit testing so I can write my i
 
 The first question can be easily solved with docker compose. If you version your compose file together with the source code it guarantees that anyone in the team can run the stack locally. With the right settings and VPN I could potentially can start up a QA environment or even a production stack just as easy as running one locally.
 
-The second question Mr Google has the response. Obviously Im not the first one facing that questions so I evaluated two possible options:
+What about the second question ? Mr Google to the rescue!. Obviously Im not the first one facing that questions so I evaluated two possible options:
 
-- Arquillian Cube : An Arquillian extension that can be used to manager Docker containers from Arquillian. With this extension we can start a Docker container with a server installed, deploy the required deployable file within it and execute Arquillian tests. Although it sound like a great fit for our project I felt adventorous and wanted to try something new and not coupled to Arquillian.
-http://arquillian.org/arquillian-cube/
-- Palantir JUNIT rule
+- [Arquillian Cube][1] : An Arquillian extension that can be used to manager Docker containers from Arquillian. With this extension we can start a Docker container with a server installed, deploy the required deployable file within it and execute Arquillian tests. Although it sound like a great fit for our project I felt adventorous and wanted to try something new and not coupled to Arquillian.
+
+- [Awesome Palantir Junit rule][2]
 I felt in love when I found the simplicity of the approach. Just a plain Junit rule with many extension points that allow you to configure mainly which is the set of containers you want to spin up before your tests are run.
-https://github.com/palantir/docker-compose-rule
 
 The project is beatifully coded, you can see someone has put a very decent effort thinking how to do it right.
 
@@ -265,56 +268,7 @@ That is why I had to add some Sleep code here and there within my tests to be 10
 
 Ok, so now that we have our Junit test ready, the only remaining bit is our docker-compose.yml file where we define our services
 
-```YAML
-version: "3"
-services:
-  DESTINY:
-    image: "app-mock"   
-    ports:
-      - "8090:8090"
-    networks:
-      - integration-tier
-  MULE:
-    image: "mule"
-    volumes:
-      - "./mule/logs:/opt/mule-standalone-3.7.0/logs"      
-    ports:
-      - "8000:8000"
-      - "8001:8000"
-      - "8002:8002"
-      - "8003:8003"
-      - "8004:8004"
-    depends_on:
-        - "RABBITMQ"
-        - "DESTINY"
-        - "WIREMOCK-ENRICHER"
-    networks:
-      - integration-tier
-  RABBITMQ:
-    image: "rabbitmq-withqueues"
-    environment:
-      RABBITMQ_ERLANG_COOKIE: "PUT-YOUR-OWN-COOKIE-HERE"
-      RABBITMQ_DEFAULT_USER: "YOUR USER"
-      RABBITMQ_DEFAULT_PASS: "YOUR PASSWD"
-      RABBITMQ_DEFAULT_VHOST: "/"
-    ports:
-    - "15672:15672"
-    - "5672:5672"
-    volumes:
-      - "./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins"   
-    networks:
-      - integration-tier
-
-  WIREMOCK-ENRICHER:
-    image: "wiremock-mocks"   
-    ports:
-      - "8080:8080"
-    networks:
-      - integration-tier
-
-networks:
-  integration-tier:
-```
+<script src="https://gist.github.com/mfarache/5bf37a907b4a2bbadd041049128de904.js"></script>
 
 + DESTINY is the application I created with Spring Boot to record the requests
 + WIREMOCK-ENRICHER is the mocks responsible of providing metadata to MuleESB
@@ -325,14 +279,8 @@ ndows mainly because by some reason Palantir uses a command "docker compose ps -
 
 # Useful links
 
-+ [builder pattern paradigm][1]  
-+ [Pipeline as Code with Jenkins][2]
-+ [Docker in docker using Jenkins slaves][3]
-+ [Why not use docker in docker][4]
-+ [Building images with Docker using jenkins pipeline][5]
++ [Arquillian Cube][1]
++ [Palantir Junit rule (github)[2]
 
-[1]: http://blog.terranillius.com/post/docker_builder_pattern/
-[2]: https://jenkins.io/solutions/pipeline/
-[3]: https://github.com/tehranian/dind-jenkins-slave
-[4]: https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/
-[5]: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
+[1]: http://arquillian.org/arquillian-cube/
+[2]: https://github.com/palantir/docker-compose-rule
