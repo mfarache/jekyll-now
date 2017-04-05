@@ -51,7 +51,7 @@ The project is beatifully coded, you can see someone has put a very decent effor
 
 So let´s get our hands dirty to set up a basic project
 
-## Add palantir dependencies
+## Add palantir dependencies to your maven pom.xml
 You can focus on the palantir dependencies only, the rest are related to junit, harmcrest matchers and REST assured that was my preferred approach to test the interactions within the components
 
 
@@ -114,78 +114,7 @@ You can focus on the palantir dependencies only, the rest are related to junit, 
 
 ## Write your unit tests
 
-```java
-import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.containsString;
-
-import org.hamcrest.Matchers;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.mycompany.integration.mule.scenario.DockerMFXUpdatesAndDeletesScenario;
-import com.mycompany.integration.rabbitmq.RabbitMqConnector;
-import com.mycompany.integration.utils.SleepUtils;
-import com.jayway.restassured.response.ValidatableResponse;
-import com.palantir.docker.compose.DockerComposeRule;
-
-/**
- * Mule Integration test Mule, ORIGIN, DESTINY, RabbitMq
- *
- */
-public class MuleIntegrationTest {
-
-    private String DESTINY_URL = "http://DESTINY:8090/app/rest/data/get?id=";
-
-    private static RabbitMqConnector rabbitmq;
-
-    private ExpectResponseDefinitions expectations = new ExpectResponseDefinitions();
-
-    @ClassRule
-    public static DockerComposeRule docker = DockerMFXUpdatesAndDeletesScenario.getDockerScenarioMuleTesting();
-
-    @BeforeClass
-    public static void initRabbitMQ() {
-        SleepUtils.sleepSeconds(50);
-        rabbitmq = new RabbitMqConnector();
-    }
-
-    @Test
-    public void shouldSendToPalmVersionActionHRDeleteWhenDeleteMessageHRReceived() {
-        whenDeleteHRMessageIsReceived();
-        SleepUtils.sleepSeconds(5);
-        thenDeleteHRActionWasSentToPalm();
-    }
-
-    private void whenDeleteHRMessageIsReceived() {
-        rabbitmq.sendDeleteMessage("1234");
-    }
-
-    private void thenDeleteHRActionWasSentToPalm() {
-        checkVersionActionMatchesForMediaId( expectations.expectedHRDelete("1234"));
-    }
-
-    private void checkVersionActionMatchesForMediaId(String expectedVersionAction) {
-        ValidatableResponse response = given().when().get(urlCheckId("1234")).then();
-        response.body("value", containsString(expectedVersionAction)).and()
-                .body("id", Matchers.equalTo("1234")).statusCode(200);
-    }
-
-    private String urlCheckId(String mediaId) {
-        return DESTINY_URL + mediaId;
-    }
-}
-```
-
-The important bit is
-
-```java
-@ClassRule
-   public static DockerComposeRule docker = DockerScenario.getDockerScenarioMuleTesting();
-```
-That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests.
+Before we dwelve into the test itself let me explain a couple of helper classes I wrote in order to simplify scenario reuse across different tests. That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests.
 Note there is a list of services. The names matches with the names used in the docker-compose file.
 
 ```java
@@ -267,6 +196,73 @@ Please note that Palantir only wait for each container service to be up & runnin
 The fact that the container is listening to the desired port does not mean that the container is fully ready.
 That is why I had to add some Sleep code here and there within my tests to be 100% sure the apps where running.
 
+```java
+import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
+
+import org.hamcrest.Matchers;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.mycompany.integration.mule.scenario.DockerMFXUpdatesAndDeletesScenario;
+import com.mycompany.integration.rabbitmq.RabbitMqConnector;
+import com.mycompany.integration.utils.SleepUtils;
+import com.jayway.restassured.response.ValidatableResponse;
+import com.palantir.docker.compose.DockerComposeRule;
+
+/**
+ * Mule Integration test Mule, ORIGIN, DESTINY, RabbitMq
+ *
+ */
+public class MuleIntegrationTest {
+
+    private String DESTINY_URL = "http://DESTINY:8090/app/rest/data/get?id=";
+
+    private static RabbitMqConnector rabbitmq;
+
+    private ExpectResponseDefinitions expectations = new ExpectResponseDefinitions();
+
+    @ClassRule
+    public static DockerComposeRule docker = DockerScenario.getDockerScenarioMuleTesting();
+
+    @BeforeClass
+    public static void initRabbitMQ() {
+        SleepUtils.sleepSeconds(50);
+        rabbitmq = new RabbitMqConnector();
+    }
+
+    @Test
+    public void shouldSendActionToDestinyWhenDeleteMessageHRReceived() {
+        whenDeleteHRMessageIsReceived();
+        SleepUtils.sleepSeconds(5);
+        thenDeleteHRActionWasSentToPalm();
+    }
+
+    private void whenDeleteHRMessageIsReceived() {
+        rabbitmq.sendDeleteMessage("1234");
+    }
+
+    private void thenDeleteHRActionWasSentToPalm() {
+        checkVersionActionMatchesForMediaId( expectations.expectedHRDelete("1234"));
+    }
+
+    private void checkVersionActionMatchesForMediaId(String expectedVersionAction) {
+        ValidatableResponse response = given().when().get(urlCheckId("1234")).then();
+        response.body("value", containsString(expectedVersionAction)).and()
+                .body("id", Matchers.equalTo("1234")).statusCode(200);
+    }
+
+    private String urlCheckId(String mediaId) {
+        return DESTINY_URL + mediaId;
+    }
+}
+```
+
+The important bit is around the ClassRule that is invoked before the test are launched spinning up all the containers defined by the scenario.
+
 Ok, so now that we have our Junit test ready, the only remaining bit is our docker-compose.yml file where we define our services
 
 <script src="https://gist.github.com/mfarache/5bf37a907b4a2bbadd041049128de904.js"></script>
@@ -276,12 +272,22 @@ Ok, so now that we have our Junit test ready, the only remaining bit is our dock
 + MULE is our ESB layer, subject of integration black box testing
 
 Everything is run within a "integration-tier" network created to run test in isolation
-ndows mainly because by some reason Palantir uses a command "docker compose ps -q <servicename>" to detect if container is up and running. And the command fails.
+
+# Key takeaways
+
++ Use REST assured for easy REST testing of endpoints
++ Use palantir  Junit rule to launch a docker compose file with the definition of your scenario.
++ Use Docker for everything!
+
+# Gotchas
+
+There were no issues running the test under Mac Os or Linux.. however there are still uses with Windows, mainly
+because by some reason Palantir uses a command "docker compose ps -q <servicename>" to detect if container is up and running. And the command fails.
 
 # Useful links
 
 + [Arquillian Cube][1]
-+ [Palantir Junit rule (github)[2]
++ [Palantir Junit rule (github)][2]
 
 [1]: http://arquillian.org/arquillian-cube/
 [2]: https://github.com/palantir/docker-compose-rule
