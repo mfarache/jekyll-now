@@ -114,7 +114,7 @@ You can focus on the palantir dependencies only, the rest are related to junit, 
 
 ## Write your unit tests
 
-```JAVA
+```java
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 
@@ -181,13 +181,13 @@ public class MFXDeleteNotificationsTest2 {
 
 The important bit is
 
-```JAVA
+```java
 @ClassRule
    public static DockerComposeRule docker = DockerScenario.getDockerScenarioMuleTesting();
 ```
 That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests
 
-```JAVA
+```java
 package com.mycompany.integration.mule.scenario;
 
 import java.util.ArrayList;
