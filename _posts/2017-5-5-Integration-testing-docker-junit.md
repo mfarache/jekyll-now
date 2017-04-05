@@ -135,7 +135,7 @@ import com.palantir.docker.compose.DockerComposeRule;
  * Mule Integration test Mule, ORIGIN, DESTINY, RabbitMq
  *
  */
-public class MFXDeleteNotificationsTest2 {
+public class MuleIntegrationTest {
 
     private String DESTINY_URL = "http://DESTINY:8090/app/rest/data/get?id=";
 
@@ -185,7 +185,8 @@ The important bit is
 @ClassRule
    public static DockerComposeRule docker = DockerScenario.getDockerScenarioMuleTesting();
 ```
-That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests
+That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests.
+Note there is a list of services. The names matches with the names used in the docker-compose file.
 
 ```java
 package com.mycompany.integration.mule.scenario;
@@ -221,7 +222,7 @@ public class DockerScenario {
 
 Lets have a look to a base class where the magic happens, before we move into the  scenario itself
 
-```JAVA
+```java
 package com.mycompany.integration.base;
 
 import java.util.List;
