@@ -30,8 +30,9 @@ Before we go ahead let me add some context about our components
 + We are not responsible of ORIGIN nor ENRICHER so those components are perfect candidates to be mocked using Wiremock.
 WireMock is a simulator for HTTP-based APIs. Some might consider it a service virtualization tool or a mock server.
 + RabbitMQ must be a real server, as this is our entry point for all the scenario variations.
-+ DESTINY is our application .... and yes we have it dockerized .... but relies on another ORACLE container and multiple dataset that must be loaded into the database before test start. As consequence I thought that would be overkilling. I just need to know that messages arrived to DESTINY, what happens next is not really our concern because we have an awesome acceptance testing on DESTINY covering nearly 95% of the code base. Someone may argue this is not integration testing and they can be right but as I explained my target was to test the behaviour of Mule as a black box. So I hacked quickly a Spring Boot application  
-that allows me to store each request in a inmemory hashmap , so I can query for them within my Junit test. Is dirty and nasty I know but I did not think anything more complex than that ;)
++ DESTINY is our application .... and yes we have it dockerized .... but relies on another ORACLE container and multiple dataset that must be loaded into the database before test start. As consequence I thought that would be overkilling. I just need to know that messages arrived to DESTINY, what happens next is not really our concern because we have an awesome acceptance testing on DESTINY covering nearly 95% of the code base. Someone may argue this is not integration testing and they can be right but as I explained my target was to test the behaviour of Mule as a black box.
+
+So I hacked quickly a Spring Boot application  that allows me to store each request in a in-memory Map , so I can query for them within my Junit test. Is dirty and nasty I know ... but I could not think anything more simple than that ;).
 
 <script src="https://gist.github.com/mfarache/dddc21330a1a602931f9c788c03220e9.js"></script>  
 
@@ -114,8 +115,7 @@ You can focus on the palantir dependencies only, the rest are related to junit, 
 
 ## Write your unit tests
 
-Before we dwelve into the test itself let me explain a couple of helper classes I wrote in order to simplify scenario reuse across different tests. That is just a wrapper I created so I can easily create different scenarios that could be reused by different tests.
-Note there is a list of services. The names matches with the names used in the docker-compose file.
+Before we dwelve into the test itself, let me explain a couple of helper classes I wrote in order to simplify scenario reuse across different tests. The first one <DockerScenario>  is just a wrapper I created so I can easily create different scenarios that could be reused by different tests. Note there is a list of named services . Remember this when speak about the docker-compose file. You will see there is match per service name.
 
 ```java
 package com.mycompany.integration.mule.scenario;
@@ -192,7 +192,7 @@ public class DockerInitializer {
 
 ```
 This class allows to specify a Docker compose file and a set of services to be monitored before the test start.
-Please note that Palantir only wait for each container service to be up & running with all the ports open.
+Please note that Palantir only waits for each container service to be up & running with all the ports open.
 The fact that the container is listening to the desired port does not mean that the container is fully ready.
 That is why I had to add some Sleep code here and there within my tests to be 100% sure the apps where running.
 
@@ -270,8 +270,15 @@ Ok, so now that we have our Junit test ready, the only remaining bit is our dock
 + DESTINY is the application I created with Spring Boot to record the requests
 + WIREMOCK-ENRICHER is the mocks responsible of providing metadata to MuleESB
 + MULE is our ESB layer, subject of integration black box testing
++ RABBITMQ is our Broker which I setup specifically with a couple of queues in my Dockerfile
 
-Everything is run within a "integration-tier" network created to run test in isolation
+Everything is run within a "integration-tier" network created to run test in isolation.
+
+You can go to your IDE and run the unit test. Boom!
+
+See output
+
+Considerations about adding a step to build the images.
 
 # Key takeaways
 
