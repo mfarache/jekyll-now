@@ -1,10 +1,8 @@
 ---
 layout: post
-title: Using docker for JAVA developers with maven
+title: Build your JAVA code with maven within a Docker container
 tags:   [ java, maven, docker ]
 ---
-Using docker for development
-
 The following post will show how developers could benefit of using Docker on the development cycle.
 Docker can be used not only to improve deployment processes or to be part of
 
