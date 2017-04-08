@@ -59,11 +59,11 @@ Instead of installing Jenkins on a machine and then add more tools we can use th
 
 Our project has the following structure were <Parent> acts as module aggregator
 
--/path/to/projectroot/Project A
-	+ childProjectA1
-	+ childProjectA2
--/path/to/projectroot/Project B
--/path/to/projectroot/PARENT
+> /path/to/projectroot/Project A
+	> childProjectA1
+	> childProjectA2
+> /path/to/projectroot/Project B
+> /path/to/projectroot/PARENT
 
 So our final command looks like
 
