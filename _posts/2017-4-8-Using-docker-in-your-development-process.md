@@ -53,7 +53,7 @@ Then I realized at the settings of my Docker Preferences that only 2GB were allo
 I increased that up to 10GB and that made the difference. That and also using the 4 cores and some mvn flag to work offline.
 There might be even further improvements if we play with the JVM settings and MAVEN_OPTS, but at least I managed to run the whole process nearly as fast as it would be running natively on my laptop.
 
-More research on this recommends using volumes so I created one, and out of curiosity you can see where Docker stores the data 
+More research on this recommends using volumes so I created one, and out of curiosity you can see where Docker stores the data
 ```
 ------------------------------------------------------------
 ~/Documents/workspace » docker volume create my-maven-volume                                                                                                 mfarache@OEL0043
@@ -75,11 +75,12 @@ So now lets use the volume
 ```
 docker run -it --rm -w /opt/maven -v $PWD:/opt/maven -v my-maven-volume:/root/.m2 maven:3.3-jdk-8 mvn clean install -f ./discovery-parent/pom.xml -DargLine="-XX:+TieredCompilation -XX:TieredStopAtLevel=1" -T 1C
 ```
-Once all the internet has been downloaded to your volume, it can be shared across all your development team and adding the offline flag your build will run much much faster.
+Once all the internet has been downloaded to your volume, it can be shared across all your development team and adding the offline flag your build will run much faster. However is fair to say that speed cannot be compared with a native build so we cannot see this approach as an improvement in productivity. Our Arquillian tests are time consumings and when run on a container you can go away and take not only one cup of coffee. Its soo slow!
 
+Lets assume for a moment that our project builds very fast and the difference with native build is less than 10%.
+Once our build ends there are multiple path alternatives we can take:
 
-Once our build ends there are multiple path alternatives we can take
-The first one would be build a image straight away and push to our own registry. I discussed several alternatives in a previous post
++ The first one would be build a image straight away and push to our own registry. I discussed several alternatives in a previous post
 [Using private docker registry alternatives][1]
 
 [1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
@@ -87,12 +88,13 @@ The first one would be build a image straight away and push to our own registry.
 The drawback of the approach is that our image will have all the toolset (mvn itselg, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
 So not a good idea when all we need is a bunch of jar files. What can we do?
 
-We could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
++ We could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
 
-+ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
-+ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
+++ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
+++ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
 
-Recently a Docker PR has just been merged to enable multi-stage builds. Lets see with an example how this will affect our build process. We will be able to do everything in a single Dockerfile:
+Recently a [Docker PR][2] has just been merged to enable multi-stage builds. Lets see with an example how this will affect our build process. We will be able to do everything in a single Dockerfile:
+[2]: https://github.com/docker/docker/pull/32063
 
 ```
 FROM maven:3.3-jdk-8 as builder
@@ -107,17 +109,6 @@ COPY --from=builder <PATH_TO_MY_JARFILE>   .
 CMD ["java -jar <JARFILE>"]
 ```
 
-# A note in multi-module projects
+#Final thoughts
 
-Our project has the following structure were <Parent> acts as module aggregator
-
-> /path/to/projectroot/Project A
-	> childProjectA1
-	> childProjectA2
-> /path/to/projectroot/Project B
-> /path/to/projectroot/PARENT
-
-So our final command looks like
-```
-docker run -it --rm -w /opt/maven -v $PWD:/opt/maven -v $HOME/.m2:/root/.m2 maven:3.3-jdk-8 mvn clean install -f ./PARENT/pom.xml
-```
+Depending on the size of the project the previous approach could be valid, but in our case we will stick to local builds non-dockerized as one of the main drivers of commit soon-commit often goes against long lasting builds.
