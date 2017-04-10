@@ -14,6 +14,7 @@ My local build works fine! but in our CI environment using Jenkins fails..
 To avoid such scenario we have introduced recently a "dockerized" build approach. The benefits are obvious
 + Everyone has exactly the same build environment, i.e JDK version, MVN version.
 + The developer´s build environment is exactly the same as the one used by our CI server
++ Developers may switch projects easily without installing tools or frameworks that contribute to reduce laptop performance over the time.
 + A new starter can join to the team and start building straight away
 
 The first approach was quite naive
@@ -48,10 +49,63 @@ A bit frustatring as we can see nothing wrong seems to be going on. CPU usage is
 ![_config.yml]({{ site.baseurl }}/images/CADVISOR-SCREEN1.png)
 ![_config.yml]({{ site.baseurl }}/images/CADVISOR-SCREEN2.png)
 
-Fortunately  Maven can be optimized to run the build in paralell among several CPUs   
+Then I realized at the settings of my Docker Preferences that only 2GB were allocated for the containers!
+I increased that up to 10GB and that made the difference. That and also using the 4 cores and some mvn flag to work offline.
+There might be even further improvements if we play with the JVM settings and MAVEN_OPTS, but at least I managed to run the whole process nearly as fast as it would be running natively on my laptop.
 
-# CI build
-Instead of installing Jenkins on a machine and then add more tools we can use the same approach so changes in the repository trigger a build which in fact launches
+More research on this recommends using volumes so I created one, and out of curiosity you can see where Docker stores the data 
+```
+------------------------------------------------------------
+~/Documents/workspace » docker volume create my-maven-volume                                                                                                 mfarache@OEL0043
+------------------------------------------------------------
+~/Documents/workspace » docker volume inspect my-maven-volume                                                                                                mfarache@OEL0043
+[
+    {
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/my-maven-volume/_data",
+        "Name": "my-maven-volume",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+So now lets use the volume
+```
+docker run -it --rm -w /opt/maven -v $PWD:/opt/maven -v my-maven-volume:/root/.m2 maven:3.3-jdk-8 mvn clean install -f ./discovery-parent/pom.xml -DargLine="-XX:+TieredCompilation -XX:TieredStopAtLevel=1" -T 1C
+```
+Once all the internet has been downloaded to your volume, it can be shared across all your development team and adding the offline flag your build will run much much faster.
+
+
+Once our build ends there are multiple path alternatives we can take
+The first one would be build a image straight away and push to our own registry. I discussed several alternatives in a previous post
+[Using private docker registry alternatives][1]
+
+[1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
+
+The drawback of the approach is that our image will have all the toolset (mvn itselg, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
+So not a good idea when all we need is a bunch of jar files. What can we do?
+
+We could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
+
++ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
++ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
+
+Recently a Docker PR has just been merged to enable multi-stage builds. Lets see with an example how this will affect our build process. We will be able to do everything in a single Dockerfile:
+
+```
+FROM maven:3.3-jdk-8 as builder
+WORKDIR <PATH_TO_YOUR_CODE>
+
+RUN mvn clean install -T4
+#This will generate the jar file in <PATH_TO_MY_JARFILE>
+
+FROM jdk-8:latest  
+
+COPY --from=builder <PATH_TO_MY_JARFILE>   .
+CMD ["java -jar <JARFILE>"]
+```
 
 # A note in multi-module projects
 
@@ -64,7 +118,6 @@ Our project has the following structure were <Parent> acts as module aggregator
 > /path/to/projectroot/PARENT
 
 So our final command looks like
-
 ```
 docker run -it --rm -w /opt/maven -v $PWD:/opt/maven -v $HOME/.m2:/root/.m2 maven:3.3-jdk-8 mvn clean install -f ./PARENT/pom.xml
 ```
