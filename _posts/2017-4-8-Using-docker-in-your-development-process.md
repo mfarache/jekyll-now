@@ -81,8 +81,7 @@ Lets assume for a moment that our project builds very fast and the difference wi
 Once our build ends there are multiple path alternatives we can take:
 
 + We could  build a image straight away and push to our own registry. I discussed several alternatives in a previous post
-[Using private docker registry alternatives][1].The drawback of the approach is that our image will have all the toolset (mvn itself, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
-So not a good idea when all we need is a bunch of jar files. What can we do?
+[Using private docker registry alternatives][1].The drawback of the approach is that our image will have the tools we used to build(mvn itself), the .m2 repository and the code and classes ... and every jar file downloaded due to project build dependencies. So not a good idea when all we need is a bunch of jar files. What can we do?
 
 + ...or we could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles.
 
