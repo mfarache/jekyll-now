@@ -80,18 +80,18 @@ Once all the internet has been downloaded to your volume, it can be shared acros
 Lets assume for a moment that our project builds very fast and the difference with native build is less than 10%.
 Once our build ends there are multiple path alternatives we can take:
 
-+ The first one would be build a image straight away and push to our own registry. I discussed several alternatives in a previous post
-[Using private docker registry alternatives][1]
++ We could  build a image straight away and push to our own registry. I discussed several alternatives in a previous post
+[Using private docker registry alternatives][1]. The drawback of the approach is that our image will have all the toolset (mvn itselg, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
+So not a good idea when all we need is a bunch of jar files. What can we do?
 
 [1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
 
-The drawback of the approach is that our image will have all the toolset (mvn itselg, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
-So not a good idea when all we need is a bunch of jar files. What can we do?
++ ...or we could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
 
-+ We could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
++ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
++ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
 
-++ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
-++ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
+# Welcome  multi-stage builds
 
 Recently a [Docker PR][2] has just been merged to enable multi-stage builds. Lets see with an example how this will affect our build process. We will be able to do everything in a single Dockerfile:
 [2]: https://github.com/docker/docker/pull/32063
@@ -109,6 +109,6 @@ COPY --from=builder <PATH_TO_MY_JARFILE>   .
 CMD ["java -jar <JARFILE>"]
 ```
 
-#Final thoughts
+# Final thoughts
 
 Depending on the size of the project the previous approach could be valid, but in our case we will stick to local builds non-dockerized as one of the main drivers of commit soon-commit often goes against long lasting builds.
