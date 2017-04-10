@@ -81,10 +81,8 @@ Lets assume for a moment that our project builds very fast and the difference wi
 Once our build ends there are multiple path alternatives we can take:
 
 + We could  build a image straight away and push to our own registry. I discussed several alternatives in a previous post
-[Using private docker registry alternatives][1]. The drawback of the approach is that our image will have all the toolset (mvn itself, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
+[Using private docker registry alternatives][1].The drawback of the approach is that our image will have all the toolset (mvn itself, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
 So not a good idea when all we need is a bunch of jar files. What can we do?
-
-[1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
 
 + ...or we could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles.
 
@@ -94,7 +92,6 @@ So not a good idea when all we need is a bunch of jar files. What can we do?
 # Welcome  multi-stage builds
 
 Recently a [Docker PR][2] has just been merged to enable multi-stage builds. Lets see with an example how this will affect our build process. We will be able to do everything in a single Dockerfile:
-[2]: https://github.com/docker/docker/pull/32063
 
 ```
 FROM maven:3.3-jdk-8 as builder
@@ -112,3 +109,11 @@ CMD ["java -jar <JARFILE>"]
 # Final thoughts
 
 Depending on the size of the project the previous approach could be valid, but in our case we will stick to local builds non-dockerized as one of the main drivers of commit soon-commit often goes against long lasting builds.
+
+# Useful links
+
++ [Using private docker registry alternatives][1]
++ [Docker PR - multi-stage builds][2]
+
+[1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
+[2]: https://github.com/docker/docker/pull/32063
