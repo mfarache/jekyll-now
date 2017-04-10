@@ -75,21 +75,21 @@ So now lets use the volume
 ```
 docker run -it --rm -w /opt/maven -v $PWD:/opt/maven -v my-maven-volume:/root/.m2 maven:3.3-jdk-8 mvn clean install -f ./discovery-parent/pom.xml -DargLine="-XX:+TieredCompilation -XX:TieredStopAtLevel=1" -T 1C
 ```
-Once all the internet has been downloaded to your volume, it can be shared across all your development team and adding the offline flag your build will run much faster. However is fair to say that speed cannot be compared with a native build so we cannot see this approach as an improvement in productivity. Our Arquillian tests are time consumings and when run on a container you can go away and take not only one cup of coffee. Its soo slow!
+Once all the internet has been downloaded to your volume, it can be shared across all your development team and adding the offline flag your build will run much faster. However is fair to say that speed cannot be compared with a native build so we cannot see this approach as an improvement in productivity. Our Arquillian tests are time consumings and when run on a container you can go away and take not only one cup of coffee. Its so sloooooow!
 
 Lets assume for a moment that our project builds very fast and the difference with native build is less than 10%.
 Once our build ends there are multiple path alternatives we can take:
 
 + We could  build a image straight away and push to our own registry. I discussed several alternatives in a previous post
-[Using private docker registry alternatives][1]. The drawback of the approach is that our image will have all the toolset (mvn itselg, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
+[Using private docker registry alternatives][1]. The drawback of the approach is that our image will have all the toolset (mvn itself, the .m2 repository which was mapped, and the code downloaded from our SCM which was also mapped. The image size will be huge.
 So not a good idea when all we need is a bunch of jar files. What can we do?
 
 [1]: https://mfarache.github.io/mfarache/Using-private-docker-registry-alternatives/
 
-+ ...or we could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles
++ ...or we could use copy command (docker cp) in order to extract the jar files from our container. The artifacts would be the basis of a workspace where we would have a Dockerfile with simple instructions to run our java code. Copying manually files from docker containers seems a bit cumbersome so using volume sharing we could streamline significatively the process. The Builder pattern for Docker can be summarized combining 2 different Dockerfiles.
 
-+ The first one builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
-+ The second dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
++ The first Dockerfile builds the code so it require a toolset and libraries to do so. The outcome is that we have an artifact ready
++ The second Dockerfile just takes the result of the first build process , extends from a basic image , adding the binary so the image result is considerably smaller.
 
 # Welcome  multi-stage builds
 
