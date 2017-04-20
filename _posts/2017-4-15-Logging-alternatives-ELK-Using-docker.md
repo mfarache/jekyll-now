@@ -14,9 +14,9 @@ ElasticSearch is been there for a while being one of the most deployed stacks fo
 
 If you do not know what ELK stands for, you better do now! ...
 
- + ELASTICSEARCH: A distributed search engine.
- + LOGSTASH : Log forwarder/agregator.
- + KIBANA: A nice UI source data visualization and exploration platform from Elastic that is specialized for large volumes of streaming and real-time
+ + ELASTICSEARCH  : A distributed search engine.
+ + LOGSTASH       : Log forwarder/agregator.
+ + KIBANA         : A nice UI source data visualization and exploration platform from Elastic that is specialized for large volumes of streaming and real-time
 
  ![_config.yml]({{ site.baseurl }}/images/KIBANA.png)
 
@@ -137,4 +137,14 @@ We have a little issue, seems our SocketAppender is sending weird escape charact
 
 There is no reason why we cannot use ELK stack in our own DEV environment and if we were in charge fully of the customer infrastructure I would recommend to replace Splunk due to the cost of the licensing.
 
-https://thepracticalsysadmin.com/shipping-logs-to-elk/
+# Useful links
+
++ [Shipping logs to ELK][1]
++ [Docker ELK repository][2]
++ [Running logstash in docker][3]
++ [ELK in docker-compose][4]
+
+[1]: https://thepracticalsysadmin.com/shipping-logs-to-elk/
+[2]: https://github.com/deviantony/docker-elk
+[3]: https://www.elastic.co/guide/en/logstash/current/docker.html
+[4]: https://www.inovex.de/blog/elk-on-docker-compose/
