@@ -78,12 +78,12 @@ Great!
 
 So we could just apply a "poor's man" solution, combining with some bash scripting and some logging policy we could schedule to send a set of files to logstash
 
-```
+```bash
 cat logfile.log | nc localhost 5010
 ```
 Or you can even do it on a live tail stream
 
-```
+```bash
 tail -f logfile.log | nc localhost 5010
 ```
 
@@ -92,7 +92,7 @@ But let´s see now how can we do integrate our application in a different way. L
 We need to do is to be sure that our logging frameworks has a logging appender to send the logs into Logstash
 Using log4j is pretty simple
 
-```
+```properties
 log4j.rootLogger=INFO,logstash
 ...
 log4j.appender.logstash=org.apache.log4j.net.SocketAppender
