@@ -42,6 +42,28 @@ Some issues you may find in Mac Os are around mounting volumes on folders which 
 
 In the picture before you see that Logstash can feed ElasticSearch with data from multiple sources. We are interested on seeing different ways of integrating our application logs without barely any effort.
 
+Let´s verify our ElasticSearch container is running correctly
+
+```
+curl http://localhost:9200/
+```
+
+```json
+{
+name: "FUrjxjY",
+cluster_name: "docker-cluster",
+cluster_uuid: "sns_eCqPRraMDmoVnCQ1Lw",
+version: {
+number: "5.3.0",
+build_hash: "3adb13b",
+build_date: "2017-03-23T03:31:50.652Z",
+build_snapshot: false,
+lucene_version: "6.4.1"
+},
+tagline: "You Know, for Search"
+}
+```
+
 Before you do anything, just add a new index , Go to your Kibana console (http://localhost:5601)  and accept the default one (logstash) so Kibana knows where to look at within the possible multiple collections you have stored in ElasticSearch.  
 
 ![_config.yml]({{ site.baseurl }}/images/KIB-INDEX.png)
@@ -114,3 +136,5 @@ We have a little issue, seems our SocketAppender is sending weird escape charact
 # Final Thoughts
 
 There is no reason why we cannot use ELK stack in our own DEV environment and if we were in charge fully of the customer infrastructure I would recommend to replace Splunk due to the cost of the licensing.
+
+https://thepracticalsysadmin.com/shipping-logs-to-elk/

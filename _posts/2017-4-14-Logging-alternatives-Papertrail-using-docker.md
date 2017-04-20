@@ -75,3 +75,15 @@ So the tools are right there, we just need to get to use them !!
 Each member of our development team can have his own logging search tool on his own laptop that facilitates searching for issues and troubleshooting. When you run a big monolithic application the usual suspects vi,grep,cut, sed do the job but once you break down your components in micro services or just smaller application with clear responsabilities,  logs start to crop in and finding where the error may be happening may get tricky.
 
 Other advantage is that we can be proactive instead of reactive. We can configure alerts on specific text patterns and be notified when instances of this error happen. We have experienced that many errors are hidden in the logs and that no one payed attention just because no one even noticed them.
+
+# Useful links
+
++ [Remote_syslog][1]
++ [Docker and Papertrail][2]
++ [Logspout repository][3]
++ [Logging rsyslog with papertrail][4]
+
+[1]: https://github.com/papertrail/remote_syslog2
+[2]: http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-docker/
+[3]: https://github.com/gliderlabs/logspout
+[4]: https://blog.kylemanna.com/linux/logging-all-the-things-with-rsyslog-and-papertrail/
