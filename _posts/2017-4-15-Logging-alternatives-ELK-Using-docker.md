@@ -1,16 +1,18 @@
 ---
 layout: post
 title: Log aggregation alternatives using docker - Elastic Search stack
-tags:   [ logging, ELK, logstash, elasticsearch, kibana, docker ]
+tags:   [ logging, ELK, logstash, elasticsearch, kibana, docker , docker-compose]
 ---
 
-I will explore in a series of post how Docker can be used to detect proactively errors via logging monitoring. First I will use Papertrail as a SaaS solution, but the space is crowded of multiple alternatives to be explored.
+This post is a continuation on a series of posts about using Docker to integrate our application logs. We will use ElasticSearch, Logstash and Kibana using docker-compose
 
 # Let me introduce you to ELK
 
-Elastic (formerly ElasticSearch) has created an end-to-end stack that delivers actionable insights in real time from almost any type of structured and unstructured data source
-If you do not know what ELK stands for, you better do now! ... ElasticSearch is been there for a while being one of the most deployed stacks for log aggregation. ElasticSearch was built from the scratch as a distributed search engine and I do not thing that alternatives like SolRCloud can reach the potential of a tool designed to be distributed from its origin.
+Elastic (formerly ElasticSearch) has created an end-to-end stack that delivers actionable insights in real time from almost any type of structured and unstructured data source.
 
+ElasticSearch is been there for a while being one of the most deployed stacks for log aggregation. ElasticSearch was built from the scratch as a distributed search engine and I do not thing that alternatives like SolRCloud can reach the potential of a tool designed to be distributed from its origin.
+
+If you do not know what ELK stands for, you better do now! ...
 
  + ELASTICSEARCH: A distributed search engine.
  + LOGSTASH : Log forwarder/agregator.
@@ -34,10 +36,7 @@ That is all you need to run a basic ELK stack.
 
 With those settings you will be able to see Kibana UI using localhost:5601. Your Logstash will be listening to receive messages in the port 5010. And ElasticSearch is the main component where we will index our log messages from our applications running in port 9200. ElasticSearch exposes a REST API that can be useful in case you need to inspect manually the collection and indexes, but we can use directly Kibana.
 
-<aside class="notice">
-Note: I changed my Docker compose from the original github file  to run logstash in 5010 to avoid conflicts with my local Docker Registry on 5000.
-</aside>
-
+### Note: I changed my Docker compose from the original github file  to run logstash in 5010 to avoid conflicts with my local Docker Registry on 5000.
 
 Some issues you may find in Mac Os are around mounting volumes on folders which are not shared. Review your Docker Shared Preferences on MacOs and you should be ready to go.
 
@@ -51,7 +50,7 @@ There other several alternatives to send information to Logstash. First lets see
 
 echo "My first awesome message" | nc localhost 5010
 
-![_config.yml]({{ site.baseurl }}/images/KIB-INDEX.png)
+![_config.yml]({{ site.baseurl }}/images/KIB-FIRSTMESSAGE.png)
 
 Great!
 
@@ -110,9 +109,8 @@ Now I run my application (in my case our Arquillian suite test ) and all the mes
 
 We have a little issue, seems our SocketAppender is sending weird escape characters for space and tabs that pollute our output.
 
+[TO BE CONTINUED...]
 
 # Final Thoughts
 
-Each member of our development team can have his own logging search tool on his own laptop that facilitates searching for issues and troubleshooting. When you run a big monolithic application the usual suspects vi,grep,cut, sed do the job but once you break down your components in micro services or just smaller application with clear responsabilities,  logs start to crop in and finding where the error may be happening may get tricky.
-
-Other advantage is that we can be proactive instead of reactive. We can configure alerts on specific text patterns and be notified when instances of this error happen. We have experienced that many errors are hidden in the logs and that no one payed attention just because no one even noticed them.
+There is no reason why we cannot use ELK stack in our own DEV environment and if we were in charge fully of the customer infrastructure I would recommend to replace Splunk due to the cost of the licensing.
