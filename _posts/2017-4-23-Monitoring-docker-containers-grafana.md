@@ -10,7 +10,7 @@ We have already covered in previous posts the usage of tools via docker starting
 
  There is a interesting piece which always helps developers when troubleshooting performance issues: monitoring.
 
- Our applications are implemented using Spring Boot. We currently use the awesome JavaMelody plugin that can be configured as a servlet to give us insights on what is going on each of our applications. You can see stats about nearly everything from application perspective
+ Our applications are implemented using Spring Boot. We currently use the awesome [JavaMelody][5] that can be configured as a servlet to give us insights on what is going on each of our applications. You can see stats about nearly everything from application perspective
 
  + HTTP stats:  Execution times, errors, and you can break it down up to SQL level.
  + SQL: Performance queries are available with their Explain plains.
@@ -18,25 +18,27 @@ We have already covered in previous posts the usage of tools via docker starting
 
  For every aspect there are stats with times (maximum, minimum, mean, average), number of invocations , percentage within the set,etc so you can pinpoint exactly where you time is being spent and find obvious candidates for improvement in case such need arises.
 
- Also the machine stats are available and you can inspect, pool, threads, system properties, JMX beans, etc
+ Also the machine stats are available and you can inspect, pool, threads, system properties, JMX beans, etc.
+
  So is really awesome, the only thing is that you need to hit a different url per application to get stats of the application. And you are also coupling the monitoring tool to your application as the jar library is part of your spring fat jar. Allegedly there is no impact in performance and we have to say that the tool has been paramount to reduce investigation vs resolution with tricky memory and performance issues.
 
 # The challenge
 
-I do not think that anything can beat the information provided by JavaMelody perspective, but is likely that there best tools out there to do the job from system / infra perspective. One thing I really miss from the current approach is that there is no way to set alerts or threshold values that enable triggering of notifications vis different channels when things go wrong.
+I do not think that anything can beat the information provided by JavaMelody perspective, but is likely that there best tools out there to do the job from system / infra perspective.
+
+One thing I really miss from the current approach is that there is no way to set alerts or threshold values that enable triggering of notifications vis different channels when things go wrong.
 
 So I started to explore posibilities of using different tools, decoupled from our application and using docker to keep going these series of post about using docker to improve the software development lifecycle.
 
- What I really needed was something lean I could spin up in a docker container. Ideally I would like to add my own graphs, criterias according to my specific needs. I work in an awesome company Piksel and I asked to our work mates what where they using to monitor the platforms we run. Words like BigBrother, Nagios, Sensus, New Relic, Grafana, Cronograph, Graphite, Cronograph, Datadog sounded like gibberish to me... so time to do some research.
+What I really needed was something lean I could spin up in a docker container. Ideally I would like to add my own graphs, criterias according to my specific needs. I work in an awesome company Piksel and I asked to our work mates what where they using to monitor the platforms we run. Words like BigBrother, Nagios, Sensus, New Relic, Grafana, Cronograph, Graphite, Cronograph, Datadog sounded like gibberish to me... so time to do some research.
 
- I ruled out those that can be considered expensive or complex like Nagios, Sensus, New Relic.
+For this proof of concept I ruled out those that can be considered expensive or complex like Nagios, Sensus, New Relic.
 
- Using google trends clearly show that Cronograph does not seem to keep the trend of the main leaders. So my 2 final candidates where Graphite and Grafana. See below the image where you can see that Grafana now is the leading the race
+Using Google trends clearly show that Cronograph does not seem to keep the trend of the main leaders. So my 2 final candidates where Graphite and Grafana. See below the image where you can see that Grafana now is the leading the race
 
  ![_config.yml]({{ site.baseurl }}/images/MON-TRENDS.png)
 
- Prometheus you can scrap statistics from applications as far they are exposed in the right format. Grafana provides a nice UI to explore them.
- So I could provide an endpoint /metrics to each application and configure my docker-compose up file including prometheus config file where the list of scraping urls are defined. This is how my config file should look like
+ With Prometheus you can scrap statistics from applications as far they are exposed in the right format. Grafana provides a nice UI to explore them. So theoretically I could provide an endpoint /metrics to each application and configure my docker-compose up file including prometheus config file where the list of scraping urls are defined. This is how my config file should look like
 
 ```yml
  global:
@@ -63,7 +65,7 @@ So I started to explore posibilities of using different tools, decoupled from ou
 # Adding metrics to our Spring Boot apps
 
 Next step would be  would be adding the "/metrics" endpoint to each application.
-SpringBoot  makes the task extremely easy. Add those annotations to your main class
+SpringBoot  makes the task extremely easy.
 
 ## 1. Add POM dependencies
 
@@ -101,8 +103,20 @@ SpringBoot  makes the task extremely easy. Add those annotations to your main cl
 # The challenge
 
 Would it not be great if I had "something" that automatically exposes stats from my containers .. but without modifying my applications?
-After some googleing I found an interesting combination involving Docker, cafvisor, Prometheus and Grafana which sounded a good candidate. This is the list of steps
 
+After some google research I found an interesting combination involving Docker, cadvisor, Prometheus and Grafana which sounded an excellent  candidate.  The solution  can be summarized in the high level diagram
+
+![_config.yml]({{ site.baseurl }}/images/MON-HLA.png)
+
+The compoments are:
+
++ Prometheus (metrics database) http://<host-ip>:9090
++ AlertManager (alerts management) http://<host-ip>:9093
++ Grafana (visualize metrics) http://<host-ip>:3000
++ NodeExporter (host metrics collector)
++ cAdvisor (containers metrics collector)
+
+Let´s get our hands dirty!
 
 ## 1. Enable experimental daemons tracking feature
 
@@ -117,18 +131,6 @@ Once you change it, Docker will restart automatically. If everything is ok you s
 
 ## 2. Start the docker compose stack
 
- The solution I found can be summarized in the high level diagram
-
-![_config.yml]({{ site.baseurl }}/images/MON-HLA.png)
-
-The compoments are:
-
-+ Prometheus (metrics database) http://<host-ip>:9090
-+ AlertManager (alerts management) http://<host-ip>:9093
-+ Grafana (visualize metrics) http://<host-ip>:3000
-+ NodeExporter (host metrics collector)
-+ cAdvisor (containers metrics collector)
-
 ```bash
  git clone https://github.com/stefanprodan/dockprom
  cd dockprom
@@ -140,13 +142,14 @@ In the following screenshot you can see how my containers look like. You can see
 ![_config.yml]({{ site.baseurl }}/images/MON-CONTAINERS.png)
 
 ## 3.1 Configure Grafana. Add datasource
- Fire your browser and hit http://localhost:3000 with credentials admin/changeme
+ Fire your browser and hit http://localhost:3000 with credentials <admin> and password <changeme>
 
  Add a prometheus datasource, the defaults are ok as we running prometheus in localhost:9090. Use local (not proxy otherwise Grafana will get 502 Errors when requesting status test page). We will run without any HTTP or security as
 
 ## 3.2 Configure Grafana. Import Dashboards
 
 Click on Dahsboards / Import / Upload json file
+
 There are useful dashboard definition in the git repository
 
 ```bash
@@ -163,18 +166,18 @@ Lets have a look to our Docker containers dashboard. We can see interesting data
 
 + Total containers CPU load, memory and storage usage
 + Running containers graph, system load graph, IO usage graph
-+ Container CPU usage graph
-+ Container memory usage graph
-+ Container cached memory usage graph
-+ Container network inbound usage graph
-+ Container network outbound usage graph  
+
+For each Container there are grapsh about
++ CPU usage graph
++ Memory usage graph
++ Network/Inbound outbound
 
 You can see that we only see containers that are not part of the docker compose stack we spinned up.
 We only see containers out of the solution, otherwise the amount of information would be overwhelming.
 
-![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA-DASH1.png)
-
 ![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA-DASH2.png)
+
+![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA-DASH1.png)
 
 ## Add some alerts!
 
@@ -187,10 +190,15 @@ I will let that as an exercise to the reader ;)
 + [A Prometheus & Grafana docker-compose][2]
 + [Enabling Docker daemon metrics][3]
 + [Docker json configuration reference][4]
-
++ [Java melody][5]
++ [Google cadvisor][6]
++ [Prometheus Monitoring][7]
 
 
 [1]:https://github.com/stefanprodan/dockprom
 [2]: https://github.com/vegasbrianc/prometheus
 [3]: https://medium.com/@basilio.vera/docker-swarm-metrics-in-prometheus-e02a6a5745a
 [4]: https://github.com/moby/moby/blob/v1.13.0-rc4/docs/reference/commandline/dockerd.md#daemon-metrics
+[5]: https://github.com/javamelody/javamelody
+[6]: https://github.com/google/cadvisor
+[7]: https://prometheus.io/
