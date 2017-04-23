@@ -28,17 +28,18 @@ I do not think that anything can beat the information provided by JavaMelody per
 
 One thing I really miss from the current approach is that there is no way to set alerts or threshold values that enable triggering of notifications vis different channels when things go wrong.
 
-So I started to explore posibilities of using different tools, decoupled from our application and using docker to keep going these series of post about using docker to improve the software development lifecycle.
+So I started to explore alternatives using different toolsets, decoupled from our application and using docker to keep going these series of post about using docker to improve the software development lifecycle.
 
-What I really needed was something lean I could spin up in a docker container. Ideally I would like to add my own graphs, criterias according to my specific needs. I work in an awesome company Piksel and I asked to our work mates what where they using to monitor the platforms we run. Words like BigBrother, Nagios, Sensus, New Relic, Grafana, Cronograph, Graphite, Cronograph, Datadog sounded like gibberish to me... so time to do some research.
+What I really needed was something lean I could spin up in a docker container. Ideally I would like to add my own graphs, criterias according to my specific needs. I work in an awesome company Piksel and I asked to our work mates what where they using to monitor the platforms we run. Words like BigBrother, Nagios, Sensus, New Relic, [Grafana][8], Cronograph, [Prometheus Monitoring][7], Graphite, Cronograph, Datadog sounded like gibberish to me... so time to do some research.
+
 
 For this proof of concept I ruled out those that can be considered expensive or complex like Nagios, Sensus, New Relic.
 
-Using Google trends clearly show that Cronograph does not seem to keep the trend of the main leaders. So my 2 final candidates where Graphite and Grafana. See below the image where you can see that Grafana now is the leading the race
+Using Google trends clearly show that Cronograph does not seem to keep the trend of the main leaders. So my 2 final candidates where Graphite and [Grafana][8]. See below the image where you can see that [Grafana][8] now is the leading the race
 
  ![_config.yml]({{ site.baseurl }}/images/MON-TRENDS.png)
 
- With Prometheus you can scrap statistics from applications as far they are exposed in the right format. Grafana provides a nice UI to explore them. So theoretically I could provide an endpoint /metrics to each application and configure my docker-compose up file including prometheus config file where the list of scraping urls are defined. This is how my config file should look like
+ With [Prometheus Monitoring][7] you can scrap statistics from applications as far they are exposed in the right format. [Grafana][8] provides a nice UI to explore them. So theoretically I could provide an endpoint /metrics to each application and configure my docker-compose up file including prometheus config file where the list of scraping urls are defined. This is how my config file should look like
 
 ```yml
  global:
@@ -104,7 +105,7 @@ SpringBoot  makes the task extremely easy.
 
 Would it not be great if I had "something" that automatically exposes stats from my containers .. but without modifying my applications?
 
-After some google research I found an interesting combination involving Docker, cadvisor, Prometheus and Grafana which sounded an excellent  candidate.  The solution  can be summarized in the high level diagram
+After some google research I found an interesting combination involving Docker, [Google cadvisor][6], [Prometheus Monitoring][7] and [Grafana][8]  which sounded an excellent  candidate.  The solution  can be summarized in the high level diagram
 
 ![_config.yml]({{ site.baseurl }}/images/MON-HLA.png)
 
@@ -144,7 +145,7 @@ In the following screenshot you can see how my containers look like. You can see
 ## 3.1 Configure Grafana. Add datasource
  Fire your browser and hit http://localhost:3000 with credentials <admin> and password <changeme>
 
- Add a prometheus datasource, the defaults are ok as we running prometheus in localhost:9090. Use local (not proxy otherwise Grafana will get 502 Errors when requesting status test page). We will run without any HTTP or security as
+ Add a Prometheus datasource, the defaults are ok as we running prometheus in localhost:9090. Use local (not proxy otherwise [Grafana][8] will get 502 Errors when requesting status test page). We will run without any HTTP or security as
 
 ## 3.2 Configure Grafana. Import Dashboards
 
@@ -179,7 +180,14 @@ We only see containers out of the solution, otherwise the amount of information 
 
 ![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA-DASH1.png)
 
-## Add some alerts!
+## Final thoughts
+
+It is really impressive how easy was to setup a local monitoring solution with barely any effort.
+Grafana can be integrated with multiple sources. See below for alternatives
+
+![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA.png)
+
+So I could imagine that if we are not happy with the Kibana (see my post on ELK stack with docker) we could even create dashboards in Grafana using ElasticSearch as a datasource!
 
 One of the main reasons to try this approach was to get notifications when values are over a specific threshold
 I will let that as an exercise to the reader ;)
@@ -193,7 +201,7 @@ I will let that as an exercise to the reader ;)
 + [Java melody][5]
 + [Google cadvisor][6]
 + [Prometheus Monitoring][7]
-
++ [Grafana][8]
 
 [1]:https://github.com/stefanprodan/dockprom
 [2]: https://github.com/vegasbrianc/prometheus
@@ -202,3 +210,4 @@ I will let that as an exercise to the reader ;)
 [5]: https://github.com/javamelody/javamelody
 [6]: https://github.com/google/cadvisor
 [7]: https://prometheus.io/
+[8]: https://grafana.com/
