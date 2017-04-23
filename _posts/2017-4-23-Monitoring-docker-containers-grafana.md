@@ -180,6 +180,59 @@ We only see containers out of the solution, otherwise the amount of information 
 
 ![_config.yml]({{ site.baseurl }}/images/MON-GRAFANA-DASH1.png)
 
+One of the main reasons to try this approach was to get notifications when values are over a specific threshold
+Alerts can be directly configured on a Grafana dashboard panel. Select a panel and you can browse different tabs.
+
+## 3.4 Configure alerts
+
+The main one is the Metrics which defines which is the query to use and the metrics display to use
+I will breakdown as an example Docker Containers / Container CPU usage panel
++ Query: sum(rate(container_cpu_user_seconds_total{image!="", container_label_org_label_schema_group!="monitoring"}[1m]) * 100  / count_scalar(node_cpu{mode="user"})) by (name)
++ Metric Lookup: container_cpu_user_seconds_total
++ General/Axis/Display: Related with how the panel is displayed
++ Alerts
+
+![_config.yml]({{ site.baseurl }}/images/MON-ALERT.png)
+
+If you prefer to configure rules manually you can see some examples on the cloned git repository:
+The following examples display 3 alert rules that pinpoint several critical scenarios on a container name called "jenkins"
+
+```bash
+~/Documents/work/dockprom/prometheus(master) » cat containers.rules                                                                                            mfarache@OEL0043
+ALERT jenkins_down
+  IF absent(container_memory_usage_bytes{name="jenkins"})
+  FOR 30s
+  LABELS { severity = "critical" }
+  ANNOTATIONS {
+    summary= "Jenkins down",
+    description= "Jenkins container is down for more than 30 seconds."
+  }
+
+ ALERT jenkins_high_cpu
+  IF sum(rate(container_cpu_usage_seconds_total{name="jenkins"}[1m])) / count(node_cpu{mode="system"}) * 100 > 10
+  FOR 30s
+  LABELS { severity = "warning" }
+  ANNOTATIONS {
+    summary= "Jenkins high CPU usage",
+    description= "Jenkins CPU usage is {{ humanize $value}}%."
+  }
+
+ALERT jenkins_high_memory
+  IF sum(container_memory_usage_bytes{name="jenkins"}) > 1200000000
+  FOR 30s
+  LABELS { severity = "warning" }
+  ANNOTATIONS {
+      summary = "Jenkins high memory usage",
+      description = "Jenkins memory consumption is at {{ humanize $value}}.",
+  }%
+```
+
+If you want to create your own rules, just place another <your_rules_files>.json in that directory and load them calling
+
+```
+ curl -X POST http://<host-ip>:9090/-/reload
+```
+
 ## Final thoughts
 
 It is really impressive how easy was to setup a local monitoring solution with barely any effort.
@@ -189,7 +242,8 @@ Grafana can be integrated with multiple sources. See below for alternatives
 
 So I could imagine that if we are not happy with the Kibana (see my post on ELK stack with docker) we could even create dashboards in Grafana using ElasticSearch as a datasource!
 
-One of the main reasons to try this approach was to get notifications when values are over a specific threshold
+
+
 I will let that as an exercise to the reader ;)
 
 # Useful links
