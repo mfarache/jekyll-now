@@ -9,7 +9,7 @@ A very short post showing some tools that can help you managing your docker cont
 # Hacking docker with terminal console
 
 I stumbled with this term  console that with you can manage your container and images. You can stop/start,  see all the layers used and sizes and see the output of the log files
-For those who are lazy not to type docker logs -f <containername> , the console gives you basic insigths on the state of your containers.
+For those who are lazy not to type docker logs -f "containername" , the console gives you basic insigths on the state of your containers.
 In MacOs I could not see the bar graphs indicators of CPU and memory resources.. but still is a nice tool to have around
 
 ```bash
