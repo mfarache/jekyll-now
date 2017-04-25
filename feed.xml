@@ -29,7 +29,7 @@ layout: none
   <link rel="alternate" type="text/html" href="{% if post.link %}{{ post.link }}{% else %}{{ site_url }}{{ post.url }}{% endif %}"/>
   <id>{{ site_url }}{{ post.id }}</id>
   {% if post.modified %}<published>{{ post.date | date_to_xmlschema }}</published>
-  <updated>{{ post.modified | date_to_xmlschema </updated>
+  <updated>{{ post.modified | date_to_xmlschema }}</updated>
   {% else %}<published>{{ post.date | date_to_xmlschema }}</published>
   <updated>{{ post.date | date_to_xmlschema }}</updated>{% endif %}
   <author>
