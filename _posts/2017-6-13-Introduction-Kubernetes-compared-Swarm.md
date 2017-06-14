@@ -1,10 +1,15 @@
 ---
 layout: post
-title: Introduction to Kubernets and quick comparison with Swarm
-tags: [ K8, kubernetes, docker]
+title: Kubernetes vs Swarm
+tags: [ kubernetes, docker]
 ---
 
-I wanted to compare Kubernetes with Docker Swarm. Why? Because after reviewing some comparisons , all of them  seem to mention identical featuresto me. Speaking with some colleagues they told me it would be crazy to run Docker swarm in production and I wanted to know why.
+This post will go through a brief introduction to K8 and see how it stands against Docker Swarm. 
+
+#  Why?
+I used Docker Swarm just for play in my laptop, sping up a few nodes in the cluster and everything works like a charm.
+After reviewing some feature comparison with K8 all of them  indicate very similar or not benefit.
+ Speaking with some colleagues they told me it would be crazy to run Docker swarm in production and I wanted to know why.
 I´m sure I was missing something, so I wanted to know the "goodies" of K8. So as introduction step, the best thing is understanding the main concepts, how it works and try to get my hands dirty. I will start a series on Kubernetes and this will be the introduction to the main concepts as I learn them, so be benevolent if I say something stupid.
 
 # .. so what is Kubernetes?
@@ -106,5 +111,11 @@ So what really seems interesting is the feature one replica sets. See some examp
 ![_config.yml]({{ site.baseurl }}/images/K8_CANARY.png)
 
 At least now this is the first thing which clearly sees a benefit when compared with Docker Swarm, and really a differentiator!
+
+Docker Swarm has other disadvantages vs K8 like
++ is not possible to reschedule nodes
++ horizontal autoscaling setup seems tricky,
++ health checks (wip)
++ not as mature as K8, every release has some issues
 
 Obviusly there are more advanced concepts such as volumes, namespaces, secret management, healthchecks, etc... but I think that so far we enough new concepts to start with, so we will get our hands dirty in the next post. We will use the recommended K8 minikube for shake of simplicity using a one node cluster.
