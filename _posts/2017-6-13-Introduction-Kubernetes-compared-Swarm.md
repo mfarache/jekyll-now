@@ -1,91 +1,110 @@
 ---
 layout: post
-title: Docker toolset to inspect your containers Sen, Portainer and caDvisor
-tags: [ cadvisor, sen, portainer, docker]
+title: Introduction to Kubernets and quick comparison with Swarm
+tags: [ K8, kubernetes, docker]
 ---
 
-A very short post showing some tools that can help you managing your docker containers in a intuitive way. We will see a terminal management tool, a nice web UI Portainer and a monitoring tool: caAdvisor from Google.
+I wanted to compare Kubernetes with Docker Swarm. Why? Because after reviewing some comparisons , all of them  seem to mention identical featuresto me. Speaking with some colleagues they told me it would be crazy to run Docker swarm in production and I wanted to know why.
+I´m sure I was missing something, so I wanted to know the "goodies" of K8. So as introduction step, the best thing is understanding the main concepts, how it works and try to get my hands dirty. I will start a series on Kubernetes and this will be the introduction to the main concepts as I learn them, so be benevolent if I say something stupid.
 
-# Hacking docker with terminal console
+# .. so what is Kubernetes?
 
-I stumbled with this term  console that with you can manage your container and images. You can stop/start,  see all the layers used and sizes and see the output of the log files.
+Kubernetes , AKA K8 , allow us to deploy and manage containers at will across several hosts within a cluster. Still do not see a difference with Swarm.. let´s find out all the hype about it. We also can schedule and run application containers on clusters of physical or virtual machines.
 
-For those who are lazy not to type docker logs -f "containername" , the console gives you basic insigths on the state of your containers.
-In MacOs I could not see the bar graphs indicators of CPU and memory resources.. but still is a nice tool to have around
+Apparently there is no restriction on the type of aplication (stateless, stateful, batch  data-processing). If an application can run in a container, it should run great on Kubernetes.
 
-```bash
-docker run -v /var/run/docker.sock:/run/docker.sock -ti -e TERM tomastomecek/sen
+The list of features are:
+
++ Mounting storage systems
++ Distributing secrets
++ Checking application health
++ Replicating application instances
++ Using Horizontal Pod Autoscaling
++ Naming and discovering
++ Balancing loads
++ Rolling updates
++ Monitoring resources
++ Accessing and ingesting logs
++ Debugging applications
++ Providing authentication and authorization
+
+So far so good, basic concepts that are also included in Docker Swarm. :(
+The search for the shining features goes on..
+
+# Kubernet architecture
+
+There are many articles with architecture description. I found this diagram summarizes everything I need to know now.
+
+![_config.yml]({{ site.baseurl }}/images/K8_ARCH.png)
+
+# Kubernet concepts
+
+I tend to be impatient when I want to learn something new. Generally I just find for the getting started guide, the less invasive for my lappy and start trying. However ..as the whole thing is pretty new, I thought this time a first walk through across concepts and some diagram  would help me understand the terminology of K8 main components.
+
+![_config.yml]({{ site.baseurl }}/images/K8_OVERVIEW.png)
+
+## PODS
+A pod is a collection of containers sharing a network and mount namespace that we can deploy in K8.
+The containers share namespace, IP and ports. PODs can be reached even across different nodes within the cluster.
+Keeping a relation one to one between pod and container is a good idea to reduce coupling.
+
+## Labels
+A semantic tagging that applies to PODs. Useful when scheduling pods across nodes via selectors, for rolling updates, specific targeting,etc.
+
+## Service
+It provides a virtual IP adress and a DNS for a set of pods.
+You can see it as a traffic forwarder.  Since Pods can be created and destroyed dinamically, the service gives an abstraction to access using the VIP (regardless the node).
+It uses IPTables  to achieve that. They keep track of the pods, and forwards traffic using the label
+You can compare with a addressable load balancer with random pod assignment strategy
+
+## Deployment
+Supervises pods and replica sets. We can define parameters like how many replicas and which pods are involved in the container. To do that we define the container(s) very similar way as we would do in docker compose. Deployments are specified via YAML files.
+The following is a deployment example
+
+```yaml
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sise-deploy
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sise
+    spec:
+      containers:
+      - name: sise
+        image: mhausenblas/simpleservice:0.5.0
+        ports:
+        - containerPort: 9876
+        env:
+        - name: SIMPLE_SERVICE_VERSION
+          value: "0.9"
 ```
-![_config.yml]({{ site.baseurl }}/images/TERMS-CONSOLE.gif)
 
-A full list of features in action can be seen here https://github.com/TomasTomecek/sen/blob/master/docs/features.md
+## Replication Controllers
+Is like the police vigilant for long-running pods. Any pod replica must stay alive running.
+Each RC use labels to track the pods he is responsible for.
 
-# Portainer
+## Nodes
+It´s where stuff happens. All of them belong to a K8 cluster. It´s Just the machine where your pod is deployed.
+We can tag nodes with labels. And we can instruct K8 to create a pod to be scheduled on a node with a specific label.
 
-If you do not fancy term style management you can use Portainer, which offers an awesome UI experience and a lot of interesting features out of the box.
-Provides you access to a docker host or a swarm cluster.
+## Jobs
+Supervise pods that have a finite lifetime.
 
-They provide a demo site so you interact with the tool without using their docker container
-Visit http://demo.portainer.io/ with credentials: "admin" / "tryportainer".
+## Replica Sets
+Responsable of keeping a number of pods running ( spinning up & down pods to reach the target).
+Replica sets allow defining scaling strategies grouping by label selectors, canary deployment or autoscaling based on cpu usage.
 
-Running in your laptop is as easy as
+So what really seems interesting is the feature one replica sets. See some examples which are self-explanatory.
 
-```bash
-~/Documents/work/mfarache(master*) » docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
-ab241b8625d9c679d1e6dd2cf4086843a89ac263cdafe33ed09a9f0a9391bc07
-```
+![_config.yml]({{ site.baseurl }}/images/K8_AUTOSCALE.png)
 
-The first time you need to provide a password for the user admin.
+![_config.yml]({{ site.baseurl }}/images/K8_CANARY.png)
 
-One you get in, you can see the list of containers with its state , and you can perform actions on them to remove them, stop them or restart them.
-I typed Running in the filter box to remove the noise of stopped/unused containers.
+At least now this is the first thing which clearly sees a benefit when compared with Docker Swarm, and really a differentiator!
 
-![_config.yml]({{ site.baseurl }}/images/TOOLS-PORTAINER-LIST-CONTAINERS.png)
-
-Let´s pick my Oracle12 container instance. Once you select a container you can see details about the containers like the command launched to execute it, which are the environment variables, the ports exposed, volumen and network information,etc.
-
-![_config.yml]({{ site.baseurl }}/images/TOOLS-PORTAINER-CONTAINER-DETAILS.png)
-
-You can also see basic cpu and memory stats for each container. The information is not comparable with the one we can get with Grafana was seen in previous post, but is a nice overview in case you want to have a sneak peek of your containers.
-
-![_config.yml]({{ site.baseurl }}/images/TOOLS-PORTAINER-CONTAINER-STATS.png)
-
-# Google caAdvisor
-
-cAdvisor allows you getting stats information about resource usage and the various performance metrics for your containers. You have a simple web UI that can be accessing hitting
-http://localhost:8080 ( in case you mapped 8080 to your host port as I did in the example below)
-
-```bash
-sudo docker run \
-  --volume=/:/rootfs:ro \
-  --volume=/var/run:/var/run:rw \
-  --volume=/sys:/sys:ro \
-  --volume=/var/lib/docker/:/var/lib/docker:ro \
-  --publish=8080:8080 \
-  --detach=true \
-  --name=cadvisor \
-  google/cadvisor:latest
-```
-
-Some screenshots to get an idea
-
-![_config.yml]({{ site.baseurl }}/images/CADVISOR-SCREEN1.png)
-![_config.yml]({{ site.baseurl }}/images/CADVISOR-SCREEN2.png)
-
-It also exposes an API that gives you access to valuable information such as
-
-+ List of subcontainers
-+ ContainerSpec which describes the resource isolation enabled in the container
-+ Detailed resource usage statistics of the container for the last N seconds (N is globally configurable in cAdvisor)
-+ Histogram of resource usage from the creation of the container
-
-
-# Useful links
-
-+ [SEN Term console][1]
-+ [Google cadvisor][2]
-+ [Portainer][3]
-
-[1]: https://github.com/TomasTomecek/sen
-[2]: https://github.com/google/cadvisor
-[3]: https://github.com/portainer/portainer
+Obviusly there are more advanced concepts such as volumes, namespaces, secret management, healthchecks, etc... but I think that so far we enough new concepts to start with, so we will get our hands dirty in the next post. We will use the recommended K8 minikube for shake of simplicity using a one node cluster.
