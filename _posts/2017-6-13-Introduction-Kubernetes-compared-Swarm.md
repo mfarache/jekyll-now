@@ -4,7 +4,7 @@ title: Kubernetes vs Swarm
 tags: [ kubernetes, docker]
 ---
 
-This post will go through a brief introduction to K8 and see how it stands against Docker Swarm. 
+This post will go through a brief introduction to K8 and see how it stands against Docker Swarm.  o
 
 #  Why?
 I used Docker Swarm just for play in my laptop, sping up a few nodes in the cluster and everything works like a charm.
@@ -104,11 +104,27 @@ Supervise pods that have a finite lifetime.
 Responsable of keeping a number of pods running ( spinning up & down pods to reach the target).
 Replica sets allow defining scaling strategies grouping by label selectors, canary deployment or autoscaling based on cpu usage.
 
-So what really seems interesting is the feature one replica sets. See some examples which are self-explanatory.
+So what really seems interesting is the feature one replica sets. Let´s see some examples which are self-explanatory.
 
+### Autoscaling
 ![_config.yml]({{ site.baseurl }}/images/K8_AUTOSCALE.png)
 
+With the help of https://github.com/kubernetes/heapster
+Heapster exposes compute resource usage, lifecycle events so can be consumed by K8.
+That information can be used to trigger scale of additional nodes if necessary when for example more than 50% CPU usage is detected.
+
+### Canary release
+
 ![_config.yml]({{ site.baseurl }}/images/K8_CANARY.png)
+
+We can see in the previous diagram  two different replica sets.
++ The first one is on charge of the pods running with the label V1.
++ The second replica takes care of pods labeled with label V2.
+
+Just playing with the parameter that determines the number of pods we want to keep running is enough.
+At the same time we keep a Service that load balance the traffic across all the pods in the nodes using a different grouping label selector (BE).
+
+This simple settings would  enable a Canary release approach.
 
 At least now this is the first thing which clearly sees a benefit when compared with Docker Swarm, and really a differentiator!
 
