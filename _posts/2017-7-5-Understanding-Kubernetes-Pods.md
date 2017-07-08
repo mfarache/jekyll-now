@@ -47,21 +47,23 @@ For each container we can also define ports, mappings, volume mounts & mount pat
 
 The manifest file also support labels attached to metadata of the pod or to the metadata of the container(s) that will run on it.
 
-We are scratching the tip of the iceberg here, so if interested dig deeper in more complex manifest files
-One important thing is the restarting policy that could happen Alway, OnFailure or Never.
+We are scratching the tip of the iceberg here, so if interested dig deeper in more complex manifest files, although we will see on in the "practical example" section. Something that draw my attention is a setting about the restarting policy that could happen Alway, OnFailure or Never. I do not recall seeing that in Docker Swarm...
 
 # Supervise the pod, yo!
 
 Pods are not meant to live long time nor to be created manually. It is recommended to create the appropriate controller and let it create Pods, rather than directly create Pods yourself.
 
-The real use case scenario is under the supervision of a controller that will schedule the existance of the pod. The nature of the desired behavior of the pod will help us to determine which kind of controller we need to use. We will see much more in the next blog post which will be focused exclusively in controllers.  A quick summary just to start getting familiar:
-	+ Do we need a one-off pod that may execute durain a finite duration?  Chose Job controller
-	+ Do we need to keep a long running service?  Chose a Replica or Deployment controller
-	+ Do we want to target a pod to a specific machine? Chose a Daemon Set.
+The real use case scenario is under the supervision of a controller that will schedule the existance of the pod.
+
+The nature of the desired behavior of the pod will help us to determine which kind of controller we need to use. We will see much more in the next blog post which will be focused exclusively in controllers.  A quick summary just to start getting familiar:
+
++ Do we need a one-off pod that may execute during a finite duration?  Chose Job controller
++ Do we need to keep a long running service?  Chose a Replica or Deployment controller
++ Do we want to target a pod to a specific machine? Chose a Daemon Set.
 
 #  The pod lifecycle
 
-Depending on whether K8 has accepted a request or how the pods terminated (ok, ko) the pod goes through different status (Pending, Running, Succeeded, Failed and Unknown).
+Depending on whether K8 has accepted a request or how the pods terminated (OK vs KO) the pod goes through different status (Pending, Running, Succeeded, Failed and Unknown).
 
 The life of a pod is not intended to last more than the node the pod is attached to. Nodes down in a cluster will evict the pods from the system, or if a scheduler consider that a pod is consuming more resources than expected can be another good reason to see our pod say good-bye and vanish.
 
@@ -70,9 +72,15 @@ The system will assign an UUID that will last till the pod is terminated. In cas
 
 # Are our pods healthy?
 
-Sometimes we really do not need to check for healthiness. If one of the pods fail by any unexpected reason and depending on the restart policy the main role of the scheduler is restarting the pod again in order to keep our request satisfied. Imagine our cluster must have 4 pods across the nodes, and one fail. No fear! K8 will detect that situation just because our pod is not attached to any node and according the restarting policy we need to have 4. The self-healing feature does not rely on health check, instead just finds out when the number of pods in our cluster is less than the target specified in the configuration of a controller.
+Sometimes we really do not need to check for healthiness. If one of the pods fail by any unexpected reason and depending on the restart policy the main role of the scheduler is restarting the pod again in order to keep our request satisfied.
 
-There are other occasion where we want to monitor specific healtchecks. K8 give us the chance to define Pod probes. What is this? Is just a fancy name to implement health-check. There are different subtypes of handlers via TCP or HTTP that are familiar to anyone who has done monitoring before. I was interested in the third one (ExecAction) . Basically command based. Let me elaborate with a simple example, let´s imagine our pod has a container that is monitoring a twitter stream of data related to a specific stock value. And let´s also assume that every time it gets a new value, and alert is generated in a folder as a file. Our check could be just based in a linux command executed within the container associated to that pod. The command checks that a new file was added in the last 5 minutes. If the result of the command is not succesful something is wrong in our pod..
+Imagine our cluster must have 4 pods across the nodes, and one fail. No fear! K8 will detect that situation just because our pod is not attached to any node and according the restarting policy we need to have 4. The self-healing feature does not rely on health check, instead just finds out when the number of pods in our cluster is less than the target specified in the configuration of a controller.
+
+There are other occasion where we want to monitor specific healtchecks. K8 give us the chance to define Pod probes.
+
+What is this? Is just a fancy name to implement health-check. There are different subtypes of handlers via TCP or HTTP that are familiar to anyone who has done monitoring before. I was more interested in the third one (ExecAction) ... Basically command based. Let me elaborate with a simple example:
+
+Let´s imagine our pod has a container that is monitoring a twitter stream of data related to a specific stock value. And let´s also assume that every time it gets a new value, and alert is generated in a folder as a file. Our check could be just based in a linux command executed within the container associated to that pod. The command checks that a new file was added in the last 5 minutes. If the result of the command is not successful something is wrong in our pod..
 
 # Practical example
 
