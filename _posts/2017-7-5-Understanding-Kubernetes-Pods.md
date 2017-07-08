@@ -113,7 +113,7 @@ If we just want to create single pod container, is very similar to the docker ru
 kubectl run example --image=busybox --port=10000 --replicas=5
 ```
 Now we can check they were created succesfully. No mistery here..  5 pods were created of a specific image
-Well not so fast, as we specified a busybox image, that does not have an entry point, automatically exits, crashes and K8 starts again trying to spint up agiain.See above for different snapshots in time
+Well not so fast, as we specified a busybox image, that does not have an entry point, automatically exits, crashes and K8 starts again trying to spin up agiain.See above for different snapshots in time
 
 ```bash
 NAME                             READY     STATUS             RESTARTS   AGE
@@ -146,7 +146,7 @@ example-1830685576-fz30h         0/1       CrashLoopBackOff   4          2m
 example-1830685576-zxr4n         0/1       CrashLoopBackOff   4          2m
 ```
 
-So lets change the image by nginx and reduce replicas to 3. Now everything works like a charm, see how the pod status change from creating,
+So lets change the image by nginx and reduce replicas to 3. Now everything works like a charm, see how the pod status change from creating to Running.
 
 ```bash
 kubectl run multi-nginx --image=nginx --port=10001 --replicas=3
@@ -248,11 +248,10 @@ spec:
           path: /sys
 ```
 
-Note: There is an excellent guide here, describe the manifest and the spec format.
+To complete our deep dive into pods , just mentioning that there are more ways to create pods:
 
-To complete our deep dive into pods , just mentioning that there are more ways to create pods.
-You could post the manifest via API to achieve the same result. The only gotcha is that the API server only accepts manifest in JSON format, so you would need to convert from YAML into JSON.
-You could drop the manifest file in a watch folder monitored by K8. The pod will be created automaticall without human intervention.
++ You could post the manifest via API to achieve the same result. The only gotcha is that the API server only accepts manifest in JSON format, so you would need to convert from YAML into JSON.
++ You could drop the manifest file in a watch folder monitored by K8. The pod will be scheduled creation without human intervention.
 
 We can also create pods dinamically. K8 has a deamon running watching a folder with manifests. If we drop a pod manifest there, the pod will be scheduled.
 
