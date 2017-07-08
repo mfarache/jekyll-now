@@ -12,7 +12,7 @@ I will using Minikube
 It can run a single-node Kubernetes cluster inside a VM . We will use xhyve drive
 Installation steps are:
 
-```
+```bash
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 && \
   chmod +x minikube && \
   sudo mv minikube /usr/local/bin/
