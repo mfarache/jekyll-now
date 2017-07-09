@@ -47,7 +47,7 @@ For each container we can also define ports, mappings, volume mounts & mount pat
 
 The manifest file also support labels attached to metadata of the pod or to the metadata of the container(s) that will run on it.
 
-We are scratching the tip of the iceberg here, so if interested dig deeper in more complex manifest files, although we will see on in the "practical example" section. Something that draw my attention is a setting about the restarting policy that could happen Alway, OnFailure or Never. I do not recall seeing that in Docker Swarm...
+We are scratching the tip of the iceberg here, so if interested dig deeper in more complex manifest files, although we will see  in the "practical example" section. Something that draw my attention is a setting about the restarting policy that could happen Alway, OnFailure or Never. I do not recall seeing that in Docker Swarm...
 
 # Supervise the pod, yo!
 
@@ -112,8 +112,8 @@ If we just want to create single pod container, is very similar to the docker ru
 ```bash
 kubectl run example --image=busybox --port=10000 --replicas=5
 ```
-Now we can check they were created succesfully. No mistery here..  5 pods were created of a specific image
-Well not so fast, as we specified a busybox image, that does not have an entry point, automatically exits, crashes and K8 starts again trying to spin up agiain.See above for different snapshots in time
+Now we can check they were created succesfully. No mistery here..  5 pods should be created, right?
+Well not so fast... as we specified a busybox image, that does not have an entry point, the container automatically exits, crashes and K8 starts again trying to spin up again. See below for different snapshots in time
 
 ```bash
 NAME                             READY     STATUS             RESTARTS   AGE
@@ -146,7 +146,8 @@ example-1830685576-fz30h         0/1       CrashLoopBackOff   4          2m
 example-1830685576-zxr4n         0/1       CrashLoopBackOff   4          2m
 ```
 
-So lets change the image by nginx and reduce replicas to 3. Now everything works like a charm, see how the pod status change from creating to Running.
+So lets change the image by nginx and reduce replicas to 3.
+Now everything works like a charm, see how the pod status change from creating to Running.
 
 ```bash
 kubectl run multi-nginx --image=nginx --port=10001 --replicas=3
@@ -179,7 +180,7 @@ Let´s pick the first one:
 NAME                           READY     STATUS    RESTARTS   AGE       IP            NODE
 multi-nginx-1080823233-17vc3   1/1       Running   0          11m       172.17.0.12   minikube
 ```
-Remember that we are using minikube as one node cluster. If we were using a cluster with multiple nodes K8 would have assigned the pod to any of the nondes available depending on assignment policies or resource quotas.
+Remember that we are using minikube as one node cluster. If we were using a cluster with multiple nodes K8 would have assigned the pod to any of the nodes available depending on assignment policies or resource quotas.
 
 Before we continue, we will remove all the pods we created using the deployment feature
 The outcome of executing run commands with previous examples was the K8 also created a "Deployment" for each of them.
@@ -193,7 +194,7 @@ kubectl delete deployment multi-nginx
 
 We can also create pods using manifest fields describing the container(s) that make the pod.
 
-Let,s grab the example at the begining and store in our filesystem with busybox.yml.
+we will grab the example at the begininng and store in our filesystem with busybox.yml.
 
 ```bash
 ~/Documents/work/k8/pods » kubectl create -f busybox.yml                                                                  
@@ -204,10 +205,11 @@ NAME      READY     STATUS    RESTARTS   AGE
 busybox   1/1       Running   0          4s
 ------------------------------------------------------------
 ```
-It has create our "sleeping" image during one hour. Then will die.
-Why? Remember the only command is sleep 3600!
+It has created our "sleeping" container during one hour. Then it will die.
+Why? Remember in our manifest the command entry was just a simple "sleep 3600"
 
-For illustrative purposes we can see other example, slightly more complex. Here I wanted to compare running cadvisor (one of the tools I use in case I need to troubleshoot performance issues).
+For illustrative purposes we can see other example, slightly more complex.
+It will run cadvisor (one of the tools I use in case I need to troubleshoot performance issues).
 Those familiar with docker compose should find it very similar... A few volume and volume mounts, one on /var/lib/docker so it can monitor the events that occurr in docker itself. You also can see that there is a port mapping from 8080 to hostPort that would our access entry point.
 
 ```yaml
@@ -252,8 +254,6 @@ To complete our deep dive into pods , just mentioning that there are more ways t
 
 + You could post the manifest via API to achieve the same result. The only gotcha is that the API server only accepts manifest in JSON format, so you would need to convert from YAML into JSON.
 + You could drop the manifest file in a watch folder monitored by K8. The pod will be scheduled creation without human intervention.
-
-We can also create pods dinamically. K8 has a deamon running watching a folder with manifests. If we drop a pod manifest there, the pod will be scheduled.
 
 # Useful links
 
