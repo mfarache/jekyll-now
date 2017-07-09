@@ -6,7 +6,11 @@ tags:   [ integration testing, docker, junit ]
 
 In this post I will share the steps that I followed to achieve integration testing that can be launched from your favourite IDE or run locally or in a CI server via maven using palantir Docker compose junit rules.
 
-In our current project we have pretty decent acceptance testing based on Arquillian. However these acceptance tests are not really a replica of how the artifacts are deployed into production and other stages. In our customer environments (DEV, QA, TRN, PRD) we use docker and we have about 11 containers, some of them are just Spring boot fat jars, others are mule ESB instances and others are Tomcat web apps. But our setting in Arquillian are defined to deploy those artifacts as war files on Jetty/Tomcat web applications servers. We also use an in-memory database that is initialized and loaded with data before the execution of our tests begin.
+# Project background context
+
+In our current project we have pretty decent acceptance testing based on Arquillian. However these acceptance tests are not really a replica of how the artifacts are deployed into production and other stages.
+
+In our customer environments (DEV, QA, TRN, PRD) we use docker and we have about 11 containers, some of them are just Spring boot fat jars, others are mule ESB instances and others are Tomcat web apps. But our setting in Arquillian are defined to deploy those artifacts as war files on Jetty/Tomcat web applications servers. We also use an in-memory database that is initialized and loaded with data before the execution of our tests begin.
 Its far from ideal as some native ORACLE queries just do not work on HQLDB so we need to tweak things to make it work.
 
 We also have automated tests using Ruby/Cucumber/Gherkin spec that allow us to apply definition of user readable stories.
@@ -14,7 +18,10 @@ We also have automated tests using Ruby/Cucumber/Gherkin spec that allow us to a
 However our ESB layer (Mule) is craving for improvements! We tried with no luck adding a suite to be part of the Arquillian acceptance test project but was not trivial. We have been using Munit for functional testing but we feel it was not enough as we were missing real integration testing.
 
 
-Our integration testing scenario can be summarized as follows
+# Integration test proof of concept scenario
+
+Our integration testing scenario can be summarized as follows:
+
 + Third party application ORIGIN push XML messages to a RabbitMQ
 + Our Mule ESB layer handle those XML messages, doing validation steps, enriching the information provided by another application
 + ENRICHER, transformation of payload and eventually a message is sent to an application DESTINY

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Understanding Kubernetes Pods]
+title: Understanding Kubernetes Pods
 tags: [ kubernetes, docker, pods]
 ---
 
@@ -86,7 +86,7 @@ Let´s imagine our pod has a container that is monitoring a twitter stream of da
 
 Ok, let´s work with the previous example
 
-Note: You may need to restart your minikube in local as explained in my previous post
+Note: You may need to restart your minikube in local as explained in my previous post [Installing Kubernetes using minikube][5]
 
 ```bash
 ~/Documents/work/k8/pods » kubectl config use-context minikube                              
@@ -264,3 +264,14 @@ To complete our deep dive into pods , just mentioning that there are more ways t
 [1]: https://kubernetes.io/docs/tasks/administer-cluster/static-pod/
 [2]: https://lukemarsden.github.io/docs/user-guide/pods/multi-container/
 [3]: http://kamalmarhubi.com/blog/2015/09/06/kubernetes-from-the-ground-up-the-api-server/
+
+### The whole blog series about Kubernetes
+
++ [1. Introduction Kubernetes vs Swarm.][4]
++ [2. Installing Kubernetes using minikube][5]
++ [3. Understanding Kubernetes pods.][6]
++ TO BE CONTINUED
+
+[4]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
+[5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
+[6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/

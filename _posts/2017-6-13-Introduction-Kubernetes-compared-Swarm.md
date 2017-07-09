@@ -7,6 +7,7 @@ tags: [ kubernetes, docker]
 This post will go through a brief introduction to K8 and see how it stands against Docker Swarm.  o
 
 #  Why?
+
 I used Docker Swarm just for play in my laptop, sping up a few nodes in the cluster and everything works like a charm.
 After reviewing some feature comparison with K8 all of them  indicate very similar or not benefit.
  Speaking with some colleagues they told me it would be crazy to run Docker swarm in production and I wanted to know why.
@@ -52,6 +53,8 @@ I tend to be impatient when I want to learn something new. Generally I just find
 A pod is a collection of containers sharing a network and mount namespace that we can deploy in K8.
 The containers share namespace, IP and ports. PODs can be reached even across different nodes within the cluster.
 Keeping a relation one to one between pod and container is a good idea to reduce coupling.
+
+Find more in my blog entry [Understanding Kubernets pods][3]
 
 ## Labels
 A semantic tagging that applies to PODs. Useful when scheduling pods across nodes via selectors, for rolling updates, specific targeting,etc.
@@ -101,7 +104,7 @@ We can tag nodes with labels. And we can instruct K8 to create a pod to be sched
 Supervise pods that have a finite lifetime.
 
 ## Replica Sets
-Responsable of keeping a number of pods running ( spinning up & down pods to reach the target).
+Responsible for keeping a number of pods running ( spinning up & down pods to reach the target).
 Replica sets allow defining scaling strategies grouping by label selectors, canary deployment or autoscaling based on cpu usage.
 
 So what really seems interesting is the feature one replica sets. Let´s see some examples which are self-explanatory.
@@ -134,4 +137,15 @@ Docker Swarm has other disadvantages vs K8 like
 + health checks (wip)
 + not as mature as K8, every release has some issues
 
-Obviusly there are more advanced concepts such as volumes, namespaces, secret management, healthchecks, etc... but I think that so far we enough new concepts to start with, so we will get our hands dirty in the next post. We will use the recommended K8 minikube for shake of simplicity using a one node cluster.
+Obviously there are more advanced concepts such as volumes, namespaces, secret management, healthchecks, etc... but I think that so far we enough new concepts to start with, so we will get our hands dirty in the next post. We will use the recommended K8 minikube for shake of simplicity using a one node cluster.
+
+### The whole blog series about Kubernetes
+
++ [1. Introduction Kubernetes vs Swarm.][1]
++ [2. Installing Kubernetes using minikube][2]
++ [3. Understanding Kubernetes pods.][3]
++ TO BE CONTINUED
+
+[1]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
+[2]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
+[3]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/

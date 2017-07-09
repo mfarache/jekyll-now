@@ -136,3 +136,16 @@ Using the console you can scale the number of pods
 You can get details of a specific log and even access to its log files.
 
 ![_config.yml]({{ site.baseurl }}/images/MINIKUBE_POD_DETAIL.png)
+
+
+### The whole blog series about Kubernetes
+
+
++ [1. Introduction Kubernetes vs Swarm.][1]
++ [2. Installing Kubernetes using minikube][2]
++ [3. Understanding Kubernetes pods.][3]
++ TO BE CONTINUED
+
+[1]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
+[2]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
+[3]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
