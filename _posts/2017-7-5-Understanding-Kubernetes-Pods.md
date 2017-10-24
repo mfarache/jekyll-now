@@ -22,7 +22,7 @@ If we deploy more than one container in the same pod, they can communicate using
 # Analysis of a pod file
 
 A pod manifest is described in YAML declaratively.
-Let´s see with the most simple pod I could imagine. We use this manifest as example in the next section.
+Let´s see with the most simple pod I could imagine. We use this manifest as example in the next section:
 
 ```yaml
 apiVersion: v1
