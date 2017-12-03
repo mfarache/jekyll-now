@@ -1,9 +1,8 @@
 ---
 layout: post
-title: Deep dive on amazon lambdas
+title: Deep dive and best practices on AWS  Lambdas
 tags: [ AWS, AWS Lambdas]
 ---
-
 The following post will attempt to go through best practices, networking and things to bear in
 mind while developing with AWS lambdas
 
@@ -54,7 +53,7 @@ If we scale things up for proper production services where lambda invocations ca
 
 ## 4. Logging
 
-Integration between CloudTrail and Lambdas is straight forward. It works like a charm in development mode and when you have just a few lambdas.
+Integration between CloudWatch logs and Lambdas is straight forward. It works like a charm in development mode and when you have just a few lambdas.
 We know that running in production, we may end up with tens/hundreds of lambdas.. In that case you may be interested adding a hook with Elastic Search, Kibana, Logstash stack.
 
 Luckily enough someone did that for us ;) [Logstash integration with AWS lambdas][4]
