@@ -31,11 +31,11 @@ Bear in mind that lambda code lifecycle goes through different stages:
 So if you have to deal with resource allocation, name resolution or targeting a database it would be advisable to do that on initialisation phase so the following invocation calls do not waste time.  Lambdas are meant to be stateless but when cost may be an issue it may be wiser to perform
 your resource allocation during initialisation phase.
 
-Initially we will rule out provisioning container time from the equation..
-Imagine that initialisation of your resource takes 2sec.
-Let´s assume processing time of your lambdas last 0.25secs
+Let´s do some maths... initially we will rule out provisioning container time from the equation..
 
-If you do not follow this basic tip, 10 consecutives lambda invocations will last 22.5 secs
+Imagine that initialisation of your resource takes 2sec and Let´s assume processing time of your lambdas last 0.25secs
+
+If you do not follow this basic tip, 10 consecutive lambda invocations will last 22.5 secs
 Following the tip will last 4.5secs.
 
 Lambdas lifetime stay live during a period of time, so if you want to avoid the container running your lambda to be shutdown, you could do "warm up" calls to keep it alive, even if that means spending some tiny amount of compute time.  
@@ -72,7 +72,7 @@ decoupled from the lambda event.
 Let´s start with an example so we can see some weaknesses of the alternative approach where everything is within the lambda.
 The lambda function should connect with an existing DynamoDB and create a user based on the provided data.
 
-```
+```java
 public class AwsCreateHandler  implements RequestHandler<CreateUserRequest, CreateUserResponse> {
 
     public CreateUserResponse handleRequest(CreateUserRequest req, Context context) {
@@ -92,7 +92,7 @@ public class AwsCreateHandler  implements RequestHandler<CreateUserRequest, Crea
 
 A possible naive approach for testing would be
 
-```
+```java
 public class AwsCreateHandlerTest {
 
     private AwsCreateHandler handler;
@@ -131,7 +131,8 @@ https://github.com/cagataygurturk/aws-lambda-java-boilerplate
 With a quick refactoring using services our code will be way easier to test.
 
 Our service interface definition
-```
+
+```java
 package com.example.lambdatesting
 
 public interface UserService {
@@ -141,7 +142,7 @@ public interface UserService {
 
 Our service implementation
 
-```
+```java
 package com.example.lambdatesting
 import org.springframework.stereotype.Component;
 
@@ -176,8 +177,9 @@ public class ConverterUtils {
   }
 }
 ```
+
 A spring configuration class to provide the context we need for autowiring
-```
+```java
 package com.example.lambdatesting
 
 import org.springframework.context.annotation.ComponentScan;
@@ -192,7 +194,7 @@ public class SpringConfig {
 ```
 
 Our lambda code now is way cleaner and easy to test.
-```
+```java
 package com.example.lambdatesting
 
 public class AwsCreateHandler  implements RequestHandler<CreateUserRequest, CreateUserResponse> {
@@ -213,7 +215,7 @@ public class AwsCreateHandler  implements RequestHandler<CreateUserRequest, Crea
 The approach allows 100% unit testing of the ConverterUtils class and our service implementation
 On top of that now we can test our lambda properly using usual mocking practices.
 
-```
+```java
 public class AwsCreateHandlerTest {
 
     private AwsCreateHandler handler;
