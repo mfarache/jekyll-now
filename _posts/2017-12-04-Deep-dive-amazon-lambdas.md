@@ -264,7 +264,7 @@ It´s based on [SAM application model][1]
 
 How it works? You define your SAM templates that may imply definition of lambda functions, API gateways of other resources.
 SAM local incorporates a http server environment where you can test your API defined in your template.
-You can also generate mock events that can be used as input for the invocations of your lambdas.
+You can also generate mock events that can be used as input for the invocations of your lambdas and validation of output results.
 
 I suggest reading [Examples on SAM cli][2] to get better understanding on the benefits of the approach
 
