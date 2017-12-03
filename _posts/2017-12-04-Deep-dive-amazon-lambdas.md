@@ -57,19 +57,20 @@ If we scale things up for proper production services where lambda invocations ca
 Integration between CloudTrail and Lambdas is straight forward. It works like a charm in development mode and when you have just a few lambdas.
 We know that running in production, we may end up with tens/hundreds of lambdas.. In that case you may be interested adding a hook with Elastic Search, Kibana, Logstash stack.
 
-Luckily enough someone did that for us ;)
-https://github.com/lukewaite/logstash-input-cloudwatch-logs
+Luckily enough someone did that for us ;) [Logstash integration with AWS lambdas][4]
 
 You specify a Log Group to stream from and this input plugin will find and consume all Log Streams within. The plugin will poll and look for streams with new records, and consume only the newest records.
 
-## 5. Split business logic from your  lambda handler
+## 5. Unit testing lambdas
 
 One of the main drawbacks with AWS lambdas is that you cannot know whether or not your code will work till is deployed into the cloud.
-In order to alleviate that a few tips on how to improve that restriction. First one is through unit testing your core business logic.
+In order to alleviate that a few tips on how to improve that restriction.
+
+First one is through unit testing your core business logic.
 So try to keep your main lambda code as small as possible, so the handler lambda function delegates responsabilities to a class which is
 decoupled from the lambda event.
 
-Let´s start with an example so we can see some weaknesses of the alternative approach where everything is within the lambda.
+We will start with an example so we can see some weaknesses of the alternative approach where everything is within the lambda.
 The lambda function should connect with an existing DynamoDB and create a user based on the provided data.
 
 ```java
@@ -124,11 +125,11 @@ public class AwsCreateHandlerTest {
 ```
 Obviusly this will never work because our lambda function tries to create a user using a database and our unit test is not aware of that.
 
-First thought would be create a service and its implementation.
-Using DI we could mock the service itself on our unit test. After some googleing apparently we can get the benefits of Spring IOC as its show in this example
-https://github.com/cagataygurturk/aws-lambda-java-boilerplate
+First thought would be create a service and its implementation.Using DI we could mock the service itself on our unit test.
+The following code assumes you have implemented the approach suggester here [Using Spring IOC with lambdas][3]
 
 With a quick refactoring using services our code will be way easier to test.
+
 
 Our service interface definition
 
@@ -260,12 +261,23 @@ due to size limitation.  Lambda function deployment package size (compressed .zi
 
 SAM Local is an AWS CLI tool that provides an environment for you to develop, test, and analyze your serverless applications locally before uploading them to the Lambda runtime.
 
-It´s based on SAM aplication model
+It´s based on [SAM application model][1]
 
-https://github.com/awslabs/serverless-application-model
-
-You define your SAM templates that may imply definition of lambda functions, API gateways of other resources.
+How it works? You define your SAM templates that may imply definition of lambda functions, API gateways of other resources.
 SAM local incorporates a http server environment where you can test your API defined in your template.
 You can also generate mock events that can be used as input for the invocations of your lambdas.
 
-I suggest reading http://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html#sam-cli-simple-app to get better understanding on the benefits of the approach
+I suggest reading [Examples on SAM cli][2] to get better understanding on the benefits of the approach
+
+# Useful links
+
++ [SAM application model][1]
++ [Examples on SAM cli][2]
++ [Using Spring IOC with lambdas][3]
++ [Logstash integration with AWS Lambdas][4]
+
+
+[1]: https://wiki.jenkins.io/display/JENKINS/AWS+Cloudformation+Plugin
+[2]: http://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html#sam-cli-simple-app
+[3]: https://github.com/cagataygurturk/aws-lambda-java-boilerplate
+[4]: https://github.com/lukewaite/logstash-input-cloudwatch-logs
