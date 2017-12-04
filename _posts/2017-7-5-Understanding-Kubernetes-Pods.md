@@ -270,8 +270,10 @@ To complete our deep dive into pods , just mentioning that there are more ways t
 + [1. Introduction Kubernetes vs Swarm.][4]
 + [2. Installing Kubernetes using minikube][5]
 + [3. Understanding Kubernetes pods.][6]
-+ TO BE CONTINUED
++ [4. Understanding Kubernetes controllers.][7]
++ K8 services to access pods
 
 [4]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
 [5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
 [6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
+[7]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Controllers/

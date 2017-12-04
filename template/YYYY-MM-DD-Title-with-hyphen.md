@@ -1,15 +1,11 @@
 ---
 layout: post
 title: Deep dive on amazon lambdas
-tags: [ AWS, AWS Lambdas, S3, Jenkins, docker]
+tags: [ AWS, AWS Lambdas, AWS Elemental, encoding, ]
 ---
 
-The following post will attempt to go through best practices, networking and things to bear in
-mind while developing with AWS lambdas
-
-# Best practices
-
-+
+Quick summary on the recent announcements in Amazon ReInvent about the new family of services targeting media encoding and storage to enable
+broadcast video workflows.
 
 # Networking
 
