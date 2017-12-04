@@ -3,16 +3,16 @@ layout: post
 title: Understanding Kubernetes Controllers
 tags: [ kubernetes, docker, pods]
 ---
-
-Understanding Kubernetes controllers is fundamental ...
+We will go through different types of controllers: Replication Controllers, ReplicaSet, Deployments.
+We also see how some operation tasks like autoscaling or rolling updates can be achieved using Kubernetes.
 
 # Replication Controllers
-
-![_config.yml]({{ site.baseurl }}/images/K8_REPLICATIONCONTROLLERS.png)
 
 They supervise that a number of pods are up and available across all your nodes.
 On failures pod are replaced by new ones instead of trying to run new ones.
 You can declare these controllers in YAML files where we specify the image and the number of replicas desired.
+
+![_config.yml]({{ site.baseurl }}/images/K8_REPLICATIONCONTROLLERS.png)
 
 Let's create a Replication controller file (busybox.yml ) to spin up a set of busybox containers.
 
@@ -39,17 +39,18 @@ spec:
 ```
 In this file we are specifying that the controller should ensure that 4 containers are runnung at every time.
 Note that I added a command to keep the busybox container alive forever. This is clearly an anti-pattern, but used for simplicity.
-You can realize that the template section is exactly the same that we used when defining a pod descriptor. [3. Understanding Kubernetes pods.][6]
 Every pod will be labeled with the label "busybox" so later we can query K8 which are the pods attached to a certain label.
 
+If you read my post [3. Understanding Kubernetes pods.][6] you can see that the template section is exactly the same that we used when defining a pod descriptor.
+
 ```bash
-~/Documents/work/k8/controllers » kubectl create -f ./busybox.yml  
+» kubectl create -f ./busybox.yml  
 replicationcontroller "busybox" created
 ```
 Once we create a controller, some time is required to provision and download the images for the pods you want to supervise before they start running.
 
 ```bash
-~/Documents/work/k8/controllers » kubectl describe replicationcontrollers/busybox
+» kubectl describe replicationcontrollers/busybox
 Name:		busybox
 Namespace:	default
 Selector:	app=busybox
@@ -82,19 +83,19 @@ Events:
 We can check if the controller is doing its job by killing one of the pods under supervision.
 
 ```bash
-~/Documents/work/k8/controllers » kubectl delete pods busybox-6fxjn
+» kubectl delete pods busybox-6fxjn
 pod "busybox-6fxjn" deleted
 ```
 Tip: In occassion we may find that killing a rogue pod gives a headache so I recommend using the force flag to get rid of them with a gracefu period
 ```bash
-~/Documents/work/k8/controllers » kubectl delete pods busybox-6fxjn --grace-period=0 --force
+» kubectl delete pods busybox-6fxjn --grace-period=0 --force
 ```
 
 Theoretically the replication controller will try to spin up a new one in order to achieve the minimum threshold declared in the replicas section of our file, that was 4.
 
 ```bash
 ------------------------------------------------------------
-~/Documents/work/k8/controllers » kubectl describe replicationcontrollers/busybox | grep replication
+» kubectl describe replicationcontrollers/busybox | grep replication
   13m		13m		1	replication-controller			Normal		SuccessfulCreate	Created pod: busybox-54sq9
   13m		13m		1	replication-controller			Normal		SuccessfulCreate	Created pod: busybox-ptgkc
   13m		13m		1	replication-controller			Normal		SuccessfulCreate	Created pod: busybox-fpnst
@@ -106,8 +107,7 @@ The output may be a bit confusing as we see 5 pods. However the controller shoul
 
 To be 100% sure we can see the pods attached by label. Remember we added the label "busybox" in our controller YAML file?
 ```bash
-------------------------------------------------------------
-~/Documents/work/k8/controllers » kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
+» kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
 busybox-54sq9 busybox-fpnst busybox-ptgkc busybox-v0qpq%
 ```
 So yes the pod we killed (busybox-6fxjn) now is dead and not under the supervision of the controller.
@@ -115,9 +115,9 @@ So yes the pod we killed (busybox-6fxjn) now is dead and not under the supervisi
 When working with controllers we may be interested on killing all the pods associated to a controller or just kill the controller and leave the pods running on its own under no supervision ( adding the --cascade flag = false). We will clean up everything, the controller and its pods.
 
 ```bash
-~/Documents/work/k8/controllers » kubectl delete -f ./busybox.yml                                                                           
+» kubectl delete -f ./busybox.yml                                                                           
 replicationcontroller "busybox" deleted
-~/Documents/work/k8/controllers » kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
+» kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
 ```
 
 The empty output means that there are no pods labeled with "busybox" any longer.
@@ -126,7 +126,7 @@ In the case you want to use more advanced patterns like Rolling Updates it needs
 and tweak the replica parameters accordingly ( decreasing in the old one and increasing in the new one). For a detailed understanding
 see (see [Performing rolling updates][1])
 
-That is the reason why  the recommended approach is using a Deployment that configures a ReplicaSet.
+That is the reason why K8 guides recommended a better approach using a Deployment descriptor targeting a ReplicaSet.
 
 # Replica Set Controllers
 
@@ -135,26 +135,26 @@ Once a ReplicaSet is in charge of a set of pods we can change the pod label so t
 
 # Autoscaling
 
-![_config.yml]({{ site.baseurl }}/images/K8_AUTOSCALING.png)
-
 Replication Controllers and Replica Set controller can be easily autoscaled based in several conditions.
 Autoscaling policies can be defined also in yaml files or can be applied on top of a resource to indicate minimum and maximum values of scaling
 when cpu conditions are reached within our k8 cluster.
 
-Using the previous example , just starting the controller created 4 pods.
+![_config.yml]({{ site.baseurl }}/images/K8_AUTOSCALING.png)
+
+We will continue using the previous example. So let´s create again our replicatoin controller. Using the previous example , just starting the controller created 4 pods.
 
 ```bash
-~/Documents/work/k8/controllers » kubectl create -f ./busybox.yml  
+» kubectl create -f ./busybox.yml  
 replicationcontroller "busybox" created
-~/Documents/work/k8/controllers » kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
+» kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
 busybox-219d6 busybox-bv454 busybox-f5771 busybox-fg8hb
 ```
 
 Let´s autoscale the controller between 7 and 10 when the target average CPU utilization (represented as a percent of requested CPU) is over 80%
 
 ```bash
-~/Documents/work/k8/controllers » kubectl autoscale -f ./busybox.yml  --min=7 --max=10 --cpu-percent=80
-~/Documents/work/k8/controllers » kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
+» kubectl autoscale -f ./busybox.yml  --min=7 --max=10 --cpu-percent=80
+» kubectl get pods --selector=app=busybox --output=jsonpath={.items..metadata.name}
 busybox-219d6 busybox-bv454 busybox-f5771 busybox-fg8hb busybox-m1rrb busybox-mt698 busybox-zl1hm
 ```
 In this case as the cpu % usage does not reach the limit the autoscaler does not need to add more container instnaces under its supervision.
@@ -191,17 +191,17 @@ spec:
 I run into multiple issues with my current version of minikube. I tried different apiVersions v1, apps/v1beta1 and apps/v1beta2 with no luck.
 Always getting the same error
 ```bash
-~/Documents/work/k8/controllers » kubectl create -f ./busybox-deployment.yml                       
+» kubectl create -f ./busybox-deployment.yml                       
 Error from server (BadRequest): error when creating "./busybox-deployment.yml": Deployment in version "v1beta2" cannot be handled as a Deployment: no kind "Deployment" is registered for version "apps/v1beta2"
 ```
 
 The solution to the issue was Final solution was to restart my minikube cluster with a specific version.
 
 ```bash
-~/Documents/work/k8/controllers » minikube start --kubernetes-version v1.6.0 --vm-driver=xhyve
-~/Documents/work/k8/controllers » kubectl create -f ./busybox-deployment.yml --record                                
+» minikube start --kubernetes-version v1.6.0 --vm-driver=xhyve
+» kubectl create -f ./busybox-deployment.yml --record                                
 deployment "busybox" created
-~/Documents/work/k8/controllers » kubectl get pods --selector=app=busybox
+» kubectl get pods --selector=app=busybox
 NAME                      READY   STATUS    RESTARTS   AGE
 busybox-361166956-0wq7v  Running  1/1       0          1m
 busybox-361166956-28lbj  Running  1/1       0          1m
@@ -211,10 +211,10 @@ busybox-361166956-82z49  Running  1/1       0          1m
 
 We can check the status of the existing Deployments
 ```bash
-~/Documents/work/k8/controllers » kubectl get deployments
+» kubectl get deployments
 NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 busybox   4         4         4            4           4m
-~/Documents/work/k8/controllers » kubectl rollout status deployment/busybox
+» kubectl rollout status deployment/busybox
 deployment "busybox" successfully rolled out
 ```
 In the previous controller section we discussed about rolling updates and I mentioned that ReplicaSet supported that approach.
@@ -224,9 +224,9 @@ Using the edit command we can access to a K8 enhanced version of our deployment 
 Locate the image section and update it
 
 ```bash
-~/Documents/work/k8/controllers » kubectl edit deployment/busybox
+» kubectl edit deployment/busybox
 deployment "busybox" edited
-~/Documents/work/k8/controllers » kubectl rollout status deployment/busybox
+» kubectl rollout status deployment/busybox
 Waiting for rollout to finish: 2 out of 4 new replicas have been updated...
 Waiting for rollout to finish: 3 out of 4 new replicas have been updated...
 Waiting for rollout to finish: 3 out of 4 new replicas have been updated...
@@ -241,7 +241,7 @@ deployment "busybox" successfully rolled out
 To verify the change we can inspect the Deployment
 
 ```bash
-~/Documents/work/k8/controllers » kubectl describe deployments          
+» kubectl describe deployments          
 Name:			busybox
 Namespace:		default
 CreationTimestamp:	Mon, 04 Dec 2017 07:13:59 +0100
@@ -264,14 +264,14 @@ Pod Template:
 Other useful commands that we may be interested in learning would be  being able to undo a rollout change ( in case our deployment went wrong).
 
 ```bash
-~/Documents/work/k8/controllers » kubectl rollout undo deployment/busybox
+» kubectl rollout undo deployment/busybox
 deployments "busybox" rolled back
 ```
 
 In case of doubt we can look to the history of commands performed to know which is the set of changes happened to a deployment
 
 ```bash
-~/Documents/work/k8/controllers » kubectl rollout history deployment/busybox
+» kubectl rollout history deployment/busybox
 deployments "busybox"
 REVISION	CHANGE-CAUSE
 1		kubectl create --filename=busybox-deployment.yml --record=true
