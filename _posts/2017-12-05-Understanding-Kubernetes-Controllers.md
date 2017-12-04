@@ -94,7 +94,6 @@ Tip: In occassion we may find that killing a rogue pod gives a headache so I rec
 Theoretically the replication controller will try to spin up a new one in order to achieve the minimum threshold declared in the replicas section of our file, that was 4.
 
 ```bash
-------------------------------------------------------------
 » kubectl describe replicationcontrollers/busybox | grep replication
   13m		13m		1	replication-controller			Normal		SuccessfulCreate	Created pod: busybox-54sq9
   13m		13m		1	replication-controller			Normal		SuccessfulCreate	Created pod: busybox-ptgkc
