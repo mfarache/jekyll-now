@@ -5,7 +5,6 @@ tags: [ OpenFaaS, Serverless, Functions As A Service ]
 ---
 
 OpenFaaS is a framework for packaging code, binaries or containers as Serverless functions on any platform.
-
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI_DEPLOY.png)
 
 # Motivation

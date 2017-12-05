@@ -5,8 +5,7 @@ tags: [ AWS, AWS Lambdas, AWS Elemental, encoding, ]
 ---
 
 Quick summary on AWS Elemental MediaConvert announced recently in Amazon ReInvent:2017
-
- ![_config.yml]({{ site.baseurl }}/images/AWS_MEDIACONVERTER.png)
+![_config.yml]({{ site.baseurl }}/images/AWS_MEDIACONVERTER.png)
 
 # File-based video transcoding workflow. Which is the problem?
 
