@@ -6,7 +6,7 @@ tags: [ OpenFaaS, Serverless, Functions As A Service ]
 
 OpenFaaS is a framework for packaging code, binaries or containers as Serverless functions on any platform.
 
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS_LOGO.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI_DEPLOY.png)
 
 # Motivation
 
@@ -202,7 +202,7 @@ For the curl fan-addicted a restful API is available exposing CRUD operations on
 
 Using the UI we can also deploy functions from a online market. I will deploy the Text-To-Speech generator
 
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI_DEPLOY.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_DEPLOY.png)
 
 Now we can invoke it using the CLI invoke command
 
@@ -254,7 +254,7 @@ Any function as a service
 # Other alternatives
 
 It's worthy mentioning that there are other frameworks out there like openwhisk, funker or iron functions but none of them run on K8.
-If we want to compare with frameworks that support K8 would be looking at 
+If we want to compare with frameworks that support K8 would be looking at
 
 + Kubeless (really just a POC)
 + Funktion (too tight coupling with Fabric, only one language python, reuse of camel connectors)
