@@ -10,9 +10,14 @@ OpenFaaS is a framework for packaging code, binaries or containers as Serverless
 # Motivation
 
 After getting back from Amazon Reinvent 2017 I wrote a blog entry about AWS Lambdas.
-On another side I was keeping track on progress in twitter about a Docker Captain (Alex Ellis) who did crazy Raspberry docker clusters in the past.
-He started OpenFaas as a proof of concept in 2016 October, when he wanted to understand if he Lambda functions on Docker Swarm.
-I had visited his repo a few times but never had the chance to play with OpenFaas.
+
+For at least 5 months I have followed  progress in twitter about @alexellisuk (Alex Ellis) who is a Docker Captain.
+He has done pretty cool things around containers and crazy Raspberry docker clusters in the past.
+
+He started OpenFaas as a proof of concept in 2016 October, when he wanted to understand if he could run Lambda functions on Docker Swarm.
+
+I had visited his github repo a few times but never had the chance to play with OpenFaas.
+
 Recently I heard that he added support for K8 via a new project, so now that K8 is fresh in my mind I thought there were no excuses to have a bit of fun.
 
 # Openfaas features
