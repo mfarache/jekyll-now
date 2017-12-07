@@ -310,6 +310,8 @@ If we want to compare with frameworks that support K8 would be looking at
 
 One of the main advantages over other frameworks is that integrate natively with both Kubernetes and Docker Swarm using Docker image format for the definition of our functions. So is a perfect candidate to be used in production environments and apply rolling upgrades of our functions or blue green deployments.
 
+For further details
+
 I really like the extensible architecture and design principles of OpenFaaS. Also the project has rocketed in the last months with forks, stars (OpenFaaS is one of the more trending Github Go projects) and an amazing supporting [OpenFaaS Community][2] so I think OpenFaaS is here to stay.
 
 Keep up the good work, Alex!
