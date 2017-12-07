@@ -224,11 +224,16 @@ If we wanted to call to the NodeJS echo function that we saw in the previous sec
 » curl http://192.168.64.2:31112/function/nodejs-echo -d "Test"
 ```
 
-# OpenFaaS Market
+# OpenFaaS Store
 
-Using the UI we can also deploy functions from a online market. I will deploy the Text-To-Speech generator
+Recently an initiative from the community allows sharing your functions to a shared store repository so anyone can use them.
 
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS_DEPLOY.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_STORE_ANNOUNCEMENT.png)
+
+The store is available from the OpenFaaS console UI.
+I will deploy the Text-To-Speech generator
+
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_STORE.png)
 
 Now we can invoke it using the CLI invoke command
 
@@ -262,6 +267,8 @@ In Graphana console:
  + Select direct access
 
 We will import the following Graphana panel (https://grafana.com/dashboards/3434) aimed to monitor OpenFaaS
+
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_GRAPHANA.png)
 
 In Graphana console:
   + Select Dashboard
@@ -311,9 +318,11 @@ Keep up the good work, Alex!
 
 + [OpenFaaS][1]
 + [OpenFaaS Community][2]
++ [OpenFaaS Store][3]
 
 [1]: https://www.openfaas.com/
 [2]: https://github.com/openfaas/faas/blob/master/community.md
+[3]: https://github.com/openfaas/store
 [4]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
 [5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
 [6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
