@@ -217,7 +217,7 @@ For the curl fan-addicted a restful API is available exposing CRUD operations on
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_SWAGGER.png)
 
-We can invoke our functions using http://<K8IPADDRESS>:<K8PORT>/function/<FUNCTIONNAME>
+We can invoke our functions using http://192.168.64.2:31112/function/FUNCTION_NAME
 
 If we wanted to call to the NodeJS echo function that we saw in the previous section
 ```bash
