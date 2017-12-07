@@ -1,11 +1,11 @@
 ---
 layout: post
 title: Functions as a service with OpenFaas
-tags: [ OpenFaaS, Serverless, Functions As A Service ]
+tags: [ OpenFaaS, Serverless, Kubernetes, Functions As A Service ]
 ---
 
 OpenFaaS is a framework for packaging code, binaries or containers as Serverless functions on any platform.
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI_DEPLOY.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_LOGO.png)
 
 # Motivation
 
@@ -14,11 +14,12 @@ After getting back from Amazon Reinvent 2017 I wrote a blog entry about AWS Lamb
 For at least 5 months I have followed  progress in twitter about @alexellisuk (Alex Ellis) who is a Docker Captain.
 He has done pretty cool things around containers and crazy Raspberry docker clusters in the past.
 
-He started OpenFaas as a proof of concept in 2016 October, when he wanted to understand if he could run Lambda functions on Docker Swarm.
+He started OpenFaas around one year ago when he wanted to understand if he could run Lambda functions on Docker Swarm.
 
-I had visited his github repo a few times but never had the chance to play with OpenFaas.
+I had visited his Github repo a few times but never had the chance to play with OpenFaas.
 
-Recently I heard that he added support for K8 via a new project, so now that K8 is fresh in my mind I thought there were no excuses to have a bit of fun.
+Openfaas provides support for Docker Swarm and Kubernetes (recently added faas-netes).
+As lately I have been playing with K8 and is fresh in my mind I thought there were no excuses to have a bit of fun.
 
 # Openfaas features
 
@@ -31,25 +32,20 @@ Openfaas provides :
 + Easy install (1minute!)
 + Multiple language support
 + Transparent autoscaling
-+ No infrastructe headaches
++ No infrastructure headaches
 + Support for Docker Swarm and Kubernetes
 + Console UI to enable deployment, invocation of functions
 + Integrated with Prometheus Alerts
-+ Asyn support
-+ Market-like serverless function repository
++ Async support
++ Market Serverless function repository
 + RESTful API
 + CLI tools to build & deploy functions to the cluster.
 
 # Installation of OpenFaas
 
-We will use Kubernetes as deployment method for OpenFaas.
-We will use minikube running on a Mac from now onwards.
+The following steps require MAC, K8, local minikube
 
-In case of doubts about minikube or K8 I have a bunch of posts that you may find interesting
-+ [1. Introduction Kubernetes vs Swarm.][4]
-+ [2. Installing Kubernetes using minikube][5]
-+ [3. Understanding Kubernetes pods.][6]
-+ [4. Understanding Kubernetes controllers.][7]
+In case of doubts about minikube review this entry [Installing Kubernetes using minikube][5]
 
 Deployment of OpenFaas is as easy as cloning a git repo and running a single command.
 
@@ -71,11 +67,13 @@ clusterrole "faas-controller" created
 clusterrolebinding "faas-controller" created
 ```
 
+Done!
+
+
 Before we move to the next step, we need to get the IP address of our Kubernete node so we can  access to its API gateway and its UI.
 
 ```bash
-» minikube ip                                                                                                       mfarache@OEL0043
-There is a newer version of minikube available (v0.24.1).  Download it here:
+» minikube ip                                                                                                       There is a newer version of minikube available (v0.24.1).  Download it here:
 https://github.com/kubernetes/minikube/releases/tag/v0.24.1
 
 To disable this notification, run the following:
@@ -92,7 +90,6 @@ The client allows building and deploying functions as a service based on a yaml 
 Let´s deploy the samples provided
 
 ```bash
-#On a MAC
 » brew install faas-cli
 » git clone https://github.com/alexellis/faas-cli
 ```
@@ -139,7 +136,8 @@ URL: http://192.168.64.2:31112/function/nodejs-echo
 Once the functions have been deployed we can see their status. None of the functions has been ever invoked.
 
 ```bash
-» faas-cli list -f samples-node-minikube.yml                                                                       mfarache@OEL0043
+» faas-cli list -f samples-node-minikube.yml                                                                       
+
 Function                      	Invocations    	Replicas
 nodejs-echo                   	0              	1
 ruby-echo                     	0              	1
@@ -147,15 +145,23 @@ shrink-image                  	0              	1
 stronghash                    	0              	1
 url-ping                      	0              	1
 ```
+# Understanding definition of functions
 
-OpenFaas uses STDIN to send metadata parameters to our function and STDOUT as mechanism  to deliver its output.
-That is the perfect combination to use linux pipeline commands.
+Our functions only need to deal with STDIN and STDOUT.
+We can interact with our functions via an API Gateway which maps incoming requests to the input processed by our function. The output of our process is marshalled back as response to our API gateway call.
 
-The framework supports ANY function as far as a Docker image is provided.
-When defining a function can be either entry point defined by a language handler or entrypoint defined by process launched on docker.
-To get a better understanting we can analyze the contents of the functions section within samples-node-minikube.yml
+OpenFaas supports ANY function as far as a Docker image is provided.
+
+Adding new function is pretty simple, via YAML file.
+
+## 1. Functions defined as language handlers
+
+Our function can be an entry point defined by a language handler (Python, Ruby, Nodejs)
+
+To get a better understanting we can analyze the contents of the functions section within our samples file.
 
 In this snippet we see that the function is based in an image which will invoke the python handler located in the relative directtory ./sample/url-ping
+
 ```yaml
 url-ping:
     lang: python
@@ -168,9 +174,10 @@ url-ping:
 ```
 The convention is handler.py for python , handler.rb for Ruby and handler.js for NodeJS
 
-However in the next step  we see that the function is based in an image which will execute a specific command line. This specific image brings the imagemagick tools in order to provide image resizing functions.
+## 2. Functions defined as processes
 
-How is this implemented? fprocess is a environment variable that is used by the image built by the Dockerfile and is the entry execution point.
+Our Dockerfile should read a fprocess enviroment variable and define an entrypoint with this command.
+The following example shows how the variable is defined as a imagemagick command.
 
 ```yaml
 shrink-image:
@@ -318,8 +325,3 @@ Keep up the good work, Alex!
 [5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
 [6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
 [7]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Controllers/
-
-
-https://hub.docker.com/r/grafana/grafana/
-https://github.com/openfaas/faas/blob/master/community.md
-https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
