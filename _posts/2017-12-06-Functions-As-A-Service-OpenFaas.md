@@ -14,20 +14,20 @@ After getting back from Amazon Reinvent 2017 I wrote a blog entry about AWS Lamb
 For at least 5 months I have followed  progress in twitter about @alexellisuk (Alex Ellis) who is a Docker Captain.
 He has done pretty cool things around containers and crazy Raspberry docker clusters in the past.
 
-He started OpenFaas around one year ago when he wanted to understand if he could run Lambda functions on Docker Swarm.
+He started OpenFaaS around one year ago when he wanted to understand if he could run Lambda functions on Docker Swarm.
 
-I had visited his Github repo a few times but never had the chance to play with OpenFaas.
+I had visited his Github repo a few times but never had the chance to play with OpenFaaS.
 
-Openfaas provides support for Docker Swarm and Kubernetes (recently added faas-netes).
+OpenFaaS provides support for Docker Swarm and Kubernetes (recently added faas-netes).
 As lately I have been playing with K8 and is fresh in my mind I thought there were no excuses to have a bit of fun.
 
-# Openfaas features
+# OpenFaaS features
 
 Functions as a service is one of the trending topics together with "serverless" architectures.
 Evolution from monolith to microservice was the first step of a drastic change.
 Now we need to start speaking about Functions as minimum deployable units that perform a single action.
 
-Openfaas provides :
+OpenFaaS provides :
 
 + Easy install (1minute!)
 + Multiple language support
@@ -41,13 +41,13 @@ Openfaas provides :
 + RESTful API
 + CLI tools to build & deploy functions to the cluster.
 
-# Installation of OpenFaas
+# Installation of OpenFaaS
 
 The following steps require MAC, K8, local minikube
 
 In case of doubts about minikube review this entry [Installing Kubernetes using minikube][5]
 
-Deployment of OpenFaas is as easy as cloning a git repo and running a single command.
+Deployment of OpenFaaS is as easy as cloning a git repo and running a single command.
 
 ```bash
 »git clone https://github.com/openfaas/faas-netes
@@ -70,7 +70,7 @@ clusterrolebinding "faas-controller" created
 Done!
 
 
-Before we move to the next step, we need to get the IP address of our Kubernete node so we can  access to its API gateway and its UI.
+Before we move to the next step, we need to get the IP address of our Kubernetes node so we can  access to its API gateway and its UI.
 
 ```bash
 » minikube ip                                                                                                       There is a newer version of minikube available (v0.24.1).  Download it here:
@@ -84,9 +84,9 @@ We can check that UI works correctly hitting http://192.168.64.2:31112/ui/  (rep
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI.png)
 
-# Installation of OpenFaas CLI
+# Installation of OpenFaaS CLI
 
-The client allows building and deploying functions as a service based on a yaml descriptor
+The client allows building and deploying functions as a service based on a YAML descriptor
 Let´s deploy the samples provided
 
 ```bash
@@ -95,7 +95,7 @@ Let´s deploy the samples provided
 ```
 # Deployment of functions
 
-There are some samples on the repositoty that gives us a chance to play with deployment of functions.
+There are some samples on the repository that gives us a chance to play with deployment of functions.
 
 ```bash
 » cd faas-cli
@@ -150,7 +150,7 @@ url-ping                      	0              	1
 Our functions only need to deal with STDIN and STDOUT.
 We can interact with our functions via an API Gateway which maps incoming requests to the input processed by our function. The output of our process is marshalled back as response to our API gateway call.
 
-OpenFaas supports ANY function as far as a Docker image is provided.
+OpenFaaS supports ANY function as far as a Docker image is provided.
 
 Adding new function is pretty simple, via YAML file.
 
@@ -158,9 +158,9 @@ Adding new function is pretty simple, via YAML file.
 
 Our function can be an entry point defined by a language handler (Python, Ruby, Nodejs)
 
-To get a better understanting we can analyze the contents of the functions section within our samples file.
+To get a better understanding we can analyse the contents of the functions section within our samples file.
 
-In this snippet we see that the function is based in an image which will invoke the python handler located in the relative directtory ./sample/url-ping
+In this snippet we see that the function is based in an image which will invoke the python handler located in the relative directory ./sample/url-ping
 
 ```yaml
 url-ping:
@@ -176,8 +176,8 @@ The convention is handler.py for python , handler.rb for Ruby and handler.js for
 
 ## 2. Functions defined as processes
 
-Our Dockerfile should read a fprocess enviroment variable and define an entrypoint with this command.
-The following example shows how the variable is defined as a imagemagick command.
+Our Dockerfile should read a "fprocess" environment variable and define an entry point with this command.
+The following example shows how the variable is defined as a resize imagemagick command.
 
 ```yaml
 shrink-image:
@@ -209,7 +209,7 @@ Hello from your Ruby function. Input: Test
 Handle this -> http://www.google.com
 http://www.google.com => 200
 ```
-# OpenFaas REST API
+# OpenFaaS REST API
 
 The CLI is not the only way to interact with OpenFaaS.
 
@@ -224,7 +224,7 @@ If we wanted to call to the NodeJS echo function that we saw in the previous sec
 » curl http://192.168.64.2:31112/function/nodejs-echo -d "Test"
 ```
 
-# OpenFaas Market
+# OpenFaaS Market
 
 Using the UI we can also deploy functions from a online market. I will deploy the Text-To-Speech generator
 
@@ -233,42 +233,41 @@ Using the UI we can also deploy functions from a online market. I will deploy th
 Now we can invoke it using the CLI invoke command
 
 ```bash
-» echo -n "OpenFaas is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3
+» echo -n "OpenFaaS is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3
 ```
 
 You can also use the API to achieve the same results
 
 ```bash
-» curl http://192.168.64.2:31112/function/text-to-speech -d "OpenFaas is an awesome framework" > ~/Documents/workspace/faas-output.mp3
+» curl http://192.168.64.2:31112/function/text-to-speech -d "OpenFaaS is an awesome framework" > ~/Documents/workspace/faas-output.mp3
 ```
 Works like a charm and the file reproduces the text I expected to hear.
 
 # Prometheus
 
-OpenFaas uses an API gateway that collects user metrics available in Prometheus.
-Prometheus  :http://192.168.64.2:31119/
+OpenFaaS uses an API gateway that collects user metrics available in Prometheus running on port 31119 of our minikube host IP address.
 
-I opted to run Graphana, create a DataSource pointing to Prometheus
+I opted to run Graphana and I created a DataSource pointing to Prometheus.
 
 ```bash
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
 ```
 Once is running we just need to create a datasource and create a panel where we can see the metrics.
 
-In Grahana console:
+In Graphana console:
  + DataSources
  + Add Datasource
  + Select Prometheus
  + Type the  URL: http://192.168.64.2:31119/
  + Select direct access
 
-We will import the following Graphana panel (https://grafana.com/dashboards/3434) aimed to monitor openFaas
+We will import the following Graphana panel (https://grafana.com/dashboards/3434) aimed to monitor OpenFaaS
 
-In Grahana console:
+In Graphana console:
   + Select Dashboard
   + Select Import panel
   + Enter the ID3434
-  + Aassociate to the DataSource we created in the previous steps (openfaas-prometheus-ds)
+  + Associate to the DataSource we created in the previous steps (openfaas-prometheus-ds)
 
 At the moment of writing this post, it seems a migration to Prometheus 2.0 could be the culprit. This PR https://github.com/openfaas/faas/pull/412 blocked currently, states that on Kubernetes metrics does not work, so really looking forward to see this issue fixed.
 
@@ -280,7 +279,7 @@ We can test autoscaling just invoking the function multiple times in a infinite 
 Note that the body of the while loop is run in background.
 
 ```bash
-while [ true ] ; do echo -n "OpenFaas is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3 & ; done
+while [ true ] ; do echo -n "OpenFaaS is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3 & ; done
 ```
 Scaling works in blocks of 5 replicas based on Prometheus alerts, more specifically the one who scale up is APIHighInvocationRate.
 
@@ -288,27 +287,33 @@ Once you manage to create enough traffic to trigger the alert your function will
 
 # Async process
 
-Currently there is a NATS implementation but there is a PR that aims to deliver Kafka as a mechanism for the streaming of events into OpenFaas.
-As OpenFaas has bee designed with extensibility in mind, other implementation will come in the future. For starters browsing github I found there is change request to support AWS SNS topics.
+Currently there is a NATS implementation but there is a PR that aims to deliver Kafka as a mechanism for the streaming of events into OpenFaaS.
+
+As OpenFaaS has bee designed with extensibility in mind, other implementation will come in the future. For starters browsing Github I found there is change request to support AWS SNS topics.
 
 # Other alternatives
 
-It's worthy mentioning that there are other frameworks out there like openwhisk, funker or iron functions but none of them run on K8.
+It's worthy mentioning that there are other frameworks out there, like Openwhisk or Iron functions but none of them run on K8.
+
 If we want to compare with frameworks that support K8 would be looking at
 
 + Kubeless (really just a POC)
 + Funktion (too tight coupling with Fabric, only one language python, reuse of camel connectors)
-+ Fision   (Written in Go, only supported languages are Node & Python, based on http triggers)
++ Fission   (Written in Go, only supported languages are Node & Python, based on http triggers)
 
-I really like the extensible architecture and design principles of Openfaas. Also the project has rocketed in the last months wiht forks, stars (on the more trending github Go project) and user contributors so I think OpenFaas is here to stay.
+One of the main advantages over other frameworks is that integrate natively with both Kubernetes and Docker Swarm using Docker image format for the definition of our functions. So is a perfect candidate to be used in production environments and apply rolling upgrades of our functions or blue green deployments.
+
+I really like the extensible architecture and design principles of OpenFaaS. Also the project has rocketed in the last months with forks, stars (OpenFaaS is one of the more trending Github Go projects) and an amazing supporting [OpenFaaS Community][2] so I think OpenFaaS is here to stay.
 
 Keep up the good work, Alex!
 
 # Useful links
 
 + [OpenFaaS][1]
++ [OpenFaaS Community][2]
 
 [1]: https://www.openfaas.com/
+[2]: https://github.com/openfaas/faas/blob/master/community.md
 [4]: https://mfarache.github.io/mfarache/Introduction-Kubernetes-compared-Swarm/
 [5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
 [6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
