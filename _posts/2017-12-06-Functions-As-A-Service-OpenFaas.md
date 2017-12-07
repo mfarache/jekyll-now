@@ -86,7 +86,7 @@ We can check that UI works correctly hitting http://192.168.64.2:31112/ui/  (rep
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_UI.png)
 
-#Installation of OpenFaas CLI
+# Installation of OpenFaas CLI
 
 The client allows building and deploying functions as a service based on a yaml descriptor
 Let´s deploy the samples provided
@@ -95,6 +95,12 @@ Let´s deploy the samples provided
 #On a MAC
 » brew install faas-cli
 » git clone https://github.com/alexellis/faas-cli
+```
+# Deployment of functions
+
+There are some samples on the repositoty that gives us a chance to play with deployment of functions.
+
+```bash
 » cd faas-cli
 » sed "s/localhost:8080/192.168.64.2:31112/g" samples.yml > samples-node-minikube.yml
 » faas-cli deploy -f samples-node-minikube.yml
@@ -196,11 +202,20 @@ Hello from your Ruby function. Input: Test
 Handle this -> http://www.google.com
 http://www.google.com => 200
 ```
+# OpenFaas REST API
 
 The CLI is not the only way to interact with OpenFaaS.
+
 For the curl fan-addicted a restful API is available exposing CRUD operations on functions, deployments and status check
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_SWAGGER.png)
+
+We can invoke our functions using http://<K8IPADDRESS>:<K8PORT>/function/<FUNCTIONNAME>
+
+If we wanted to call to the NodeJS echo function that we saw in the previous section
+```bash
+» curl http://192.168.64.2:31112/function/nodejs-echo -d "Test"
+```
 
 # OpenFaas Market
 
@@ -225,6 +240,32 @@ Works like a charm and the file reproduces the text I expected to hear.
 
 OpenFaas uses an API gateway that collects user metrics available in Prometheus.
 Prometheus  :http://192.168.64.2:31119/
+
+I opted to run Graphana, create a DataSource pointing to Prometheus
+
+```bash
+docker run -d --name=grafana -p 3000:3000 grafana/grafana
+```
+Once is running we just need to create a datasource and create a panel where we can see the metrics.
+
+In Grahana console:
+ + DataSources
+ + Add Datasource
+ + Select Prometheus
+ + Type the  URL: http://192.168.64.2:31119/
+ + Select direct access
+
+We will import the following Graphana panel (https://grafana.com/dashboards/3434) aimed to monitor openFaas
+
+In Grahana console:
+  + Select Dashboard
+  + Select Import panel
+  + Enter the ID3434
+  + Aassociate to the DataSource we created in the previous steps (openfaas-prometheus-ds)
+
+After all this I cannot see any metric :(
+
+At the moment of writing this post, it seems a migration to Prometheus 2.0 could be the culprit. This PR https://github.com/openfaas/faas/pull/412 blocked currently, states that on Kubernetes metrics does not work, so really looking forward to see this issue fixed.
 
 # Autoscaling
 
@@ -253,7 +294,7 @@ I would love to see the auto-scaling in action.
 # Async process
 
 Currently there is a NATS implementation but there is a PR that aims to deliver Kafka as a mechanism for the streaming of events into OpenFaas.
-Any function as a service
+As OpenFaas has bee designed with extensibility in mind, other implementation will come in the future. For starters browsing github I found there is change request to support AWS SNS topics.
 
 # Other alternatives
 
@@ -264,7 +305,9 @@ If we want to compare with frameworks that support K8 would be looking at
 + Funktion (too tight coupling with Fabric, only one language python, reuse of camel connectors)
 + Fision   (Written in Go, only supported languages are Node & Python, based on http triggers)
 
-I really like the architecure design principles of Openfaas. Also the project has rocketed in the last months wiht forks, stars (on the more trending github Go project) and user contributors so I think OpenFaas is here to stay. Keep up the good work, Alex!
+I really like the extensible architecture and design principles of Openfaas. Also the project has rocketed in the last months wiht forks, stars (on the more trending github Go project) and user contributors so I think OpenFaas is here to stay.
+
+Keep up the good work, Alex!
 
 # Useful links
 
@@ -275,3 +318,8 @@ I really like the architecure design principles of Openfaas. Also the project ha
 [5]:https://mfarache.github.io/mfarache/Installing-Kubernetes-using-Minikube/
 [6]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Pods/
 [7]:https://mfarache.github.io/mfarache/Understanding-Kubernetes-Controllers/
+
+
+https://hub.docker.com/r/grafana/grafana/
+https://github.com/openfaas/faas/blob/master/community.md
+https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
