@@ -270,8 +270,6 @@ In Grahana console:
   + Enter the ID3434
   + Aassociate to the DataSource we created in the previous steps (openfaas-prometheus-ds)
 
-After all this I cannot see any metric :(
-
 At the moment of writing this post, it seems a migration to Prometheus 2.0 could be the culprit. This PR https://github.com/openfaas/faas/pull/412 blocked currently, states that on Kubernetes metrics does not work, so really looking forward to see this issue fixed.
 
 # Autoscaling
@@ -279,24 +277,14 @@ At the moment of writing this post, it seems a migration to Prometheus 2.0 could
 The gateway also scale the functions based on demand of your containers.
 
 We can test autoscaling just invoking the function multiple times in a infinite loop.
-In order not to starve our resource we will sleep 0.2 secs before we launch a new call.
-Note that the body of the while loop is run in background. In these conditions I would expect that the number of replicas of the function would start growing after some warm-up time... however it did not :( and not a clue why not.
-
-Reducing the time to 0.1sec did not help. In less than 1 minute I had launched 300 requests and openFaas become irresponsive.
-```bash
-while [ true ] ; do sleep 0.1 && echo -n "OpenFaas is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3 & ; done
-```
-
-As the test implied writing into a MP3 file I thought the issue could be concurrent lock on the file itself.
-As the purpose of the test is just see how replica works I changed the approach to use one of the echo services
+Note that the body of the while loop is run in background.
 
 ```bash
-while [ true ] ; do sleep 0.3 && echo -n Test | faas-cli invoke nodejs-echo --gateway http://192.168.64.2:31112 & ; done
+while [ true ] ; do echo -n "OpenFaas is an awesome framework" | faas-cli invoke text-to-speech  --gateway http://192.168.64.2:31112 > ~/Documents/workspace/faas-output.mp3 & ; done
 ```
-Same result.
+Scaling works in blocks of 5 replicas based on Prometheus alerts, more specifically the one who scale up is APIHighInvocationRate.
 
-I found this bug that could explain it: https://github.com/openfaas/faas-netes/issues/36
-I would love to see the auto-scaling in action.
+Once you manage to create enough traffic to trigger the alert your service will autoscaled.
 
 # Async process
 
