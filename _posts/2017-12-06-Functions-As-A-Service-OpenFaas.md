@@ -274,7 +274,7 @@ At the moment of writing this post, it seems a migration to Prometheus 2.0 could
 
 # Autoscaling
 
-The gateway also scale the functions based on demand of your containers.
+The gateway also scale the functions based on traffic rates.
 
 We can test autoscaling just invoking the function multiple times in a infinite loop.
 Note that the body of the while loop is run in background.
@@ -284,7 +284,7 @@ while [ true ] ; do echo -n "OpenFaas is an awesome framework" | faas-cli invoke
 ```
 Scaling works in blocks of 5 replicas based on Prometheus alerts, more specifically the one who scale up is APIHighInvocationRate.
 
-Once you manage to create enough traffic to trigger the alert your service will autoscaled.
+Once you manage to create enough traffic to trigger the alert your function will autoscaled.
 
 # Async process
 
