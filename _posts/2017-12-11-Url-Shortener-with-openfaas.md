@@ -4,7 +4,8 @@ title: Serverless function using OpenFaaS, NodeJS and mongoDB.
 tags: [ Serverless, OpenFaaS, Nodejs, mongodb ]
 ---
 
-Using OpenFaas deployed into Docker Swarm to deploy a NodeJS serverless function backed by a MongoDB database
+I will describe how to deploy a new NodeJs function into OpenFaaS using Docker Swarm stack.
+The function will be written in NodeJs and speak to MongoDB to read/write data.
 
 # The idea
 
@@ -12,7 +13,6 @@ After getting started with OpenFaaS and Kubernetes in my previous post, now it w
 In order to spice up things a little , I decided that the serverless function could have a external dependency like a database
 
 Url shortening is a perfect candidate to be implemented as a serverless function.
-
 
 The following diagram shows what we will build.
 
@@ -275,7 +275,7 @@ node index.js < in.text
 
 where in.txt looks like
 
-```JSON
+```bash
 {
   "URL" : "http://www.google.com"
 }
@@ -319,15 +319,18 @@ Then let's see if is able to resolve the previous shortened URL
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS_URLRESOLVER.png)
 
-#Summary
+# Summary
 
 The more I play with OpenFaas the more I like it.  
-It took me a few hours to setup everything and running.
-The bits I really struggled with where related with MongoDB authentication.
-It also was not easy to debug what was going on within the NodeJS functions running on top of OpenFaaS, but luckily there are some awesome tips in the community issues that helped me to dig out the bottom of the issues. Some tips for newbies like me
+
+It took me just a few hours to setup everything and running.
+
+The only bits I really struggled with were related with MongoDB authentication.
+It was not easy to debug what was going on within the NodeJS functions running on top of OpenFaaS, but luckily there are some awesome tips in the community issues, that helped me to dig out the bottom of the issues. Some tips for newbies like me around NodeJS.
 
 + Add log4js to see what is going within your NodeJS function.
-+ Our index.js needs to indicate process.exit(0) so the gateway considers our request to be completed. Otherwise the action will be performed but you will never get back the response.
++ Our index.js needs to indicate process.exit(0) so the gateway considers our request to be completed. Otherwise the action will be performed but you will never get back the response
++ If you send request data as Text but using Json (as you can see in the screenshots) from the OpenFaaS UI, you must parse the text into a JSON object
 
 The whole code repository is [here][3]
 
@@ -335,12 +338,12 @@ The whole code repository is [here][3]
 
 + [short nodejs package][1]
 + [enable authentication on MongoDB][2]
-+ [URL shortener openfaas github repository][3]
++ [URL shortener github repository][3]
 + [Remote Debugging openFaas apps][4]
 + [Improve logging for functions during erorr][5]
 
 [1]: https://www.npmjs.com/package/short
 [2]: https://docs.mongodb.com/master/tutorial/enable-authentication/
-[3]: https://docs.mongodb.com/master/tutorial/enable-authentication/
+[3]: https://github.com/mfarache/openfaas-mongodb-urlshortener
 [4]: https://github.com/openfaas/faas/issues/223
 [5]: https://github.com/openfaas/faas/issues/11
