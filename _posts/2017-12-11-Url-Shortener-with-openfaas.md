@@ -30,8 +30,6 @@ The following diagram shows what we will build.
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS-MONGO.png)
 
-The whole exercise took me a few hours, and the main gotchas where about authentication issues with Mongo, and being sure my function was able to reply back to the gateway its results. I spent quite a lot to figure out what was going on
-
 
 # OpenFaas and Docker Swarm
 
@@ -282,7 +280,7 @@ If you intend to do any changes you should consider using your own registry and 
 
 If we want to see everything in action
 
-```
+```bash
 git clone
 cd openfaas-mongodb-urlshortener
 #See the section about enable authorization and to add the user to the database
@@ -291,7 +289,7 @@ cd openfaas-mongodb-urlshortener
 
 After deploying our stack we can see our two functions running as docker containers
 
-```
+```bash
 » docker ps     
 CONTAINER ID        IMAGE                                         COMMAND                  CREATED             STATUS                       PORTS                    NAMES
 ca627f311b37        dockermau/openfaas-mongodb-urlresolver:1.0    "fwatchdog"              28 minutes ago      Up 28 minutes (healthy)                               func_urlresolver.1.jrmkvuolxolw2innzpcpz7xod
