@@ -9,7 +9,7 @@ The function will be written in NodeJs and speak to MongoDB to read/write data.
 
 # The idea
 
-After getting started with OpenFaaS and Kubernetes in my previous post, now it was time to test it with Docker Swarm.
+After getting started with OpenFaaS and Kubernetes in my previous post [Functions as a service with OpenFaaS][6], now it is time to test it with Docker Swarm.
 In order to spice up things a little , I decided that the serverless function could have a external dependency like a database
 
 Url shortening is a perfect candidate to be implemented as a serverless function.
@@ -46,7 +46,7 @@ I will assume you have latest Docker version and Docker swarm enabled
 docker swarm init
 ```
 
-We will use docker-compose YAML file to deploy the whole stack.
+We will use *docker-compose.yml* file to deploy the whole stack.
 
 ```yaml
 version: "3.2"
@@ -153,27 +153,37 @@ We define in the stack the following services
 
 ## MongoDB setup
 
-Before we go ahead with the definition, a note about authentication with MongoDB
-By default authentication is not enabled so there are some required steps we need to follow.
-If we want to use the mongoDB image with authentication enabled the steps to follow are:
+Before we go ahead with the definition, a note about authentication with MongoDB.
+By default authentication is not enabled, so there are some required steps we need to follow.
+
+Start docker container to enable authentication:
 
 ```bash
 docker run  --name mongodb -v /datastore/mongodb:/data/db -e MONGO_INITDB_ROOT_USERNAME="urlshortener" -e MONGO_INITDB_ROOT_PASSWORD="urlsh0rt3n3r" mongo:3.4.10
 ```
 
-As we passed the parameters , the user now it has been created.
+As we passed the parameters MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD, the first time the container starts up, will create a new user in the admin schema.
+
 Now we can safely stop the container
 ```bash
 docker stop mongodb
 ```
-You can see that  I run the container with a mapping volume. This way the changes done to the database are kept in the mapped directory of the host. And you can also realize that the mapped volume matches with the one defined in our docker-compose file.
-So once the stack is launched, MongoDB would allow authentication and our function will be able to connect to the mongo instance.
+
+And restart it again.
+```bash
+docker stop mongodb
+```
+If we SSH to the machine, then run mongo client and from there we can see the user was created succesfully.
+
+I run the container with a mapping volume. This way the changes done to the database are kept in the mapped directory of the host.
+You can also see that the mapped volume matches with the one defined in our *docker-compose.yml* file.
+So once the docker stack is launched, MongoDB would allow authentication and our function will be able to connect to the mongo instance.
 
 # Our OpenFaaS function
 
 Reviewing samples from OpenFaaS github repositories, it seems that a  good practice is breaking down your code in two parts
 
-*index.js*
+**index.js**
 
 It reads from standard input and delegates processing to a handler function which does the job.
 We can always use this approach, so we can focus on our function logic in the *handler.js* code.
@@ -212,12 +222,12 @@ let isObject = (a) => {
 };
 ```
 
-*handler.js*
+**handler.js**
 
-I used [short nodejs package][1] library that does the job of shortening our url and storing them against a mongodb schema via promises.
-It´s very important not to use conole.log after the "shortURLPromise.then" statement.
-Why? If we do so, the caller of our callback context (index.js) would think is the response.
-
+I found [URL Shortener - Nodejs package ][1] library that does the job of shortening our url and storing metadata in a MongoDB schema.
+short library functions are invoked via promises, which can give you a bit of a headache if by any chance you use *console.log* statements immediately after the promise is executed.
+Why? If we do so, the caller of our callback context (index.js) would consider it as the output of our function.
+It happened to me, so you are warned.
 ```js
 "use strict"
 
@@ -230,10 +240,6 @@ log4js.configure({
 });
 
 var logger = log4js.getLogger('urlshortener');
-
-//local testing
-//var mongoDbUrl =`mongodb://urlshortener:urlsh0rt3n3r@localhost:27017/admin`;
-
 var mongoDbUrl =`mongodb://urlshortener:urlsh0rt3n3r@mongodb:27017/admin`;
 
 module.exports = (context, callback) => {
@@ -262,18 +268,35 @@ shortURLPromise.then(function(mongodbDoc) {
     callback(error, null);
   }
 });
+  // DO NOT USE console.log from now onwards
+  // console.log("whatever")
+  // because that output will be sent to the index.js and therefore will become the reposnse of our function :(
+
 }
 ```
 
-Before we build our function we can test locally, restarting the container we stopped in previous steps, and be sure that in handler.js the connection string url refers to localhost instead.
+Before we build our function and deploy it inot OpenFaaS, a good approach is perform local testing:
 
-Note:  MongoDB URL is hardcoded, however the code should be modified to retrieve the host, port, username and password from the environment variables which are poopulated from the docker-compose.yaml file
+1. Restart the container we stopped in previous steps
+
+```bash
+docker start mongodb
+```
+
+2. Ensure *handler.js* the connection string url refers to localhost instead.
+
+```js
+//local testing
+var mongoDbUrl =`mongodb://urlshortener:urlsh0rt3n3r@localhost:27017/admin`;
+```
+
+3. Execute *index.js* reading the stdin from a file
 
 ```bash
 node index.js < in.text
 ```
 
-where in.txt looks like
+where *in.txt* looks like
 
 ```bash
 {
@@ -281,11 +304,10 @@ where in.txt looks like
 }
 ```
 
-
-Once we know our function code works locally, we can revert the change to use the proper URL.
+Once we check  our function code works locally, we can revert the change to use the  URL that points to mongodb, as within Docker Swarm container are accesible by name if they run within the same network. You can see that in the *docker-compose.yml* file both the mongodb and the urlshortener function are running in a overlay network named "functions"
 
 The following steps shows how I built my code function and pushed to my own Docker registry.
-If you intend to do any changes you should consider using your own registry and modify the docker-compose file so the function refers to your image.
+If you intend to do any changes you should consider using your own registry and modify the *docker-compose.yml* file so the function refers to your image.
 
 If we want to see everything in action
 
@@ -336,14 +358,16 @@ The whole code repository is [here][3]
 
 # Useful links
 
-+ [short nodejs package][1]
++ [URL Shortener - Nodejs package][1]
 + [enable authentication on MongoDB][2]
 + [URL shortener github repository][3]
 + [Remote Debugging openFaas apps][4]
 + [Improve logging for functions during erorr][5]
++ [Functions as a service with OpenFaaS][6]
 
 [1]: https://www.npmjs.com/package/short
 [2]: https://docs.mongodb.com/master/tutorial/enable-authentication/
 [3]: https://github.com/mfarache/openfaas-mongodb-urlshortener
 [4]: https://github.com/openfaas/faas/issues/223
 [5]: https://github.com/openfaas/faas/issues/11
+[6]: https://mfarache.github.io/mfarache/Functions-As-A-Service-OpenFaas/
