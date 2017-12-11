@@ -1,46 +1,52 @@
 ---
 layout: post
-title: Serverless function backed by database using OpenFaaS
-tags: [ Serverless, OpenFaaS ]
+title: Serverless function using OpenFaaS, NodeJS and mongoDB.
+tags: [ Serverless, OpenFaaS, Nodejs, mongodb ]
 ---
 
 Using OpenFaas deployed into Docker Swarm to deploy a NodeJS serverless function backed by a MongoDB database
 
 # The idea
 
-After getting started with OpenFaas and Kubernetes in my previous post, now it was time to test it with Docker Swarm.
+After getting started with OpenFaaS and Kubernetes in my previous post, now it was time to test it with Docker Swarm.
 In order to spice up things a little , I decided that the serverless function could have a external dependency like a database
 
-Url shortening is a perfect candidate to be implemented as a serverless function. I will focus just in two main uses cases
+Url shortening is a perfect candidate to be implemented as a serverless function.
 
-As a user
-I want to shorten a URL
-So I can share the shortened URL via twitter
-
-As a user
-I want to resolve a shortened URL
-So I can visit the URL associated to the shortened one
-
-If we want to implement both scenarios we need to persist both the URL and the shortened URL so it can be resolved later.
-We will use a No-SQL document database like MongoDb to do the job.
-
-Each of the use cases will be implemented as a NodeJS function deployed into OpenFaas.
 
 The following diagram shows what we will build.
 
 ![_config.yml]({{ site.baseurl }}/images/OPENFAAS-MONGO.png)
 
+I will focus just in two main user stories:
+
+```bash
+As a user
+I want to shorten a URL
+So I can share the shortened URL via twitter
+```
+
+```bash
+As a user
+I want to resolve a shortened URL
+So I can visit the URL associated to the shortened one
+```
+
+If we want to implement both scenarios we need to persist both the URL and the shortened URL so it can be resolved later.
+We will use a No-SQL document database like MongoDb to do the job.
+
+Each of the use cases will be implemented as a independent NodeJS function deployed into OpenFaaS.
 
 # OpenFaas and Docker Swarm
 
-In previous post I explained how to deploy using Kubernetes, however in this post I will deploy OpenFaas using Docker Swarm.
+In previous post I explained how to deploy using Kubernetes, however in this post I will deploy OpenFaaS using Docker Swarm.
 I will assume you have latest Docker version and Docker swarm enabled
 
-```
+```bash
 docker swarm init
 ```
 
-We will use a YAML file to deploy the whole stack.
+We will use docker-compose YAML file to deploy the whole stack.
 
 ```yaml
 version: "3.2"
@@ -138,26 +144,26 @@ networks:
         # Docker does not support this option yet - maybe create outside of the stack and reference as "external"?
         #attachable: true
 ```
-We define in the stack services
+We define in the stack the following services
 
-+ OpenFaas main component: the gateway
++ OpenFaas main component: The gateway
 + OpenFaas functions: alertmanager and prometheus.
 + Our mongodb image (See note below about how to enable auth)
 + Our serverless function, which refers to an image in my personal Docker registry
 
-# MongoDB setup
+## MongoDB setup
 
 Before we go ahead with the definition, a note about authentication with MongoDB
 By default authentication is not enabled so there are some required steps we need to follow.
 If we want to use the mongoDB image with authentication enabled the steps to follow are:
 
-```
+```bash
 docker run  --name mongodb -v /datastore/mongodb:/data/db -e MONGO_INITDB_ROOT_USERNAME="urlshortener" -e MONGO_INITDB_ROOT_PASSWORD="urlsh0rt3n3r" mongo:3.4.10
 ```
 
 As we passed the parameters , the user now it has been created.
 Now we can safely stop the container
-```
+```bash
 docker stop mongodb
 ```
 You can see that  I run the container with a mapping volume. This way the changes done to the database are kept in the mapped directory of the host. And you can also realize that the mapped volume matches with the one defined in our docker-compose file.
@@ -304,11 +310,11 @@ We can see our functions in action hitting the OpenFaaS UI ( http://localhost:80
 
 First let's shorten a URL
 
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS-URLSHORTENER.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_URLSHORTENER.png)
 
 Then let's see if is able to resolve the previous shortened URL
 
-![_config.yml]({{ site.baseurl }}/images/OPENFAAS-URLRESOLVER.png)
+![_config.yml]({{ site.baseurl }}/images/OPENFAAS_URLRESOLVER.png)
 
 #Summary
 
@@ -329,6 +335,7 @@ The whole code repository is [here][3]
 + [URL shortener openfaas github repository][3]
 + [Remote Debugging openFaas apps][4]
 + [Improve logging for functions during erorr][5]
+
 [1]: https://www.npmjs.com/package/short
 [2]: https://docs.mongodb.com/master/tutorial/enable-authentication/
 [3]: https://docs.mongodb.com/master/tutorial/enable-authentication/
