@@ -173,7 +173,10 @@ So once the stack is launched, MongoDB would allow authentication and our functi
 
 Reviewing samples from OpenFaaS github repositories, it seems that a  good practice is breaking down your code in two parts
 
-index.js: Which mainly read from STD input and delegates processing to a handler function which does the job.
+*index.js*
+
+It reads from standard input and delegates processing to a handler function which does the job.
+We can always use this approach, so we can focus on our function logic in the *handler.js* code.
 
 ```js
 "use strict"
@@ -209,9 +212,9 @@ let isObject = (a) => {
 };
 ```
 
-handler.js
+*handler.js*
 
-I used short library that does the job of shortening our url and storing them against a mongodb schema via promises.
+I used [short nodejs package][1] library that does the job of shortening our url and storing them against a mongodb schema via promises.
 It´s very important not to use conole.log after the "shortURLPromise.then" statement.
 Why? If we do so, the caller of our callback context (index.js) would think is the response.
 
