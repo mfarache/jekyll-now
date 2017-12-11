@@ -171,11 +171,10 @@ docker stop mongodb
 
 And restart it again.
 ```bash
-docker stop mongodb
+docker start mongodb
 ```
-If we SSH to the machine, then run mongo client and from there we can see the user was created succesfully.
 
-I run the container with a mapping volume. This way the changes done to the database are kept in the mapped directory of the host.
+Please not that I run the container with a mapping volume. This way the changes done to the database are kept in the mapped directory of the host.
 You can also see that the mapped volume matches with the one defined in our *docker-compose.yml* file.
 So once the docker stack is launched, MongoDB would allow authentication and our function will be able to connect to the mongo instance.
 
