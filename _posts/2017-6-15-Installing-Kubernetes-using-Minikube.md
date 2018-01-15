@@ -137,6 +137,21 @@ You can get details of a specific log and even access to its log files.
 
 ![_config.yml]({{ site.baseurl }}/images/MINIKUBE_POD_DETAIL.png)
 
+# Uninstall .. in case you run into issues...
+
+In MacOS I noticed some times minikube fails with xhyve drive (note will not be supported anylonger).
+Occasionally the minikube start command fails and make impossible to work with it.
+You can fully remove minikube from your laptop by following these instructions:
+
+```bash
+minikube stop; minikube delete
+docker stop (docker ps -aq)
+rm -r ~/.kube ~/.minikube
+sudo rm /usr/local/bin/localkube /usr/local/bin/minikube
+systemctl stop '*kubelet*.mount'
+sudo rm -rf /etc/kubernetes/
+docker system prune -af --volumes
+```
 
 ### The whole blog series about Kubernetes
 
