@@ -610,18 +610,52 @@ $GOPATH/src/queue_listener
 ```
 The following screenshot shows how I lay out my terminal screen where you can see everything in action.
 
-![_config.yml]({{ site.baseurl }}/images/GOMS-TERMINAL.png)
+![_config.yml]({{ site.baseurl }}/images/GOMS-DIAGRAM.png)
 
-On the left side you can see the output of the 4 services *cdnurl* , *metadata*, *reporting* and *play*.
+On the left side you can see the output of the 3 services *cdnurl* , *metadata*, *reporting* and *play*.
 On the right side on top is our NATS server and in the bottom the *queue_listener*.
 
-So now you can start simulating video viewing actions hitting the play service  and observe how the downstream services are called and stats are generated and consumed via the queu service.
+# What I learnt ( Go perspective)
 
-```bash
-curl -X POST localhost:8080/play/asset/456/user/8
-curl -X POST localhost:8080/play/asset/123/user/1
-........
+I created this section to highlight some facts I discovered while coding Go, a new language for me.
+
+Instead of reading the whole Golang book and tutorials, I prefer to start coding, searching and learning when the need arises on specific topics.
+As a consequence I find a lot of times that things do not work as I thought that they should work...
+
++ The learning curve is medium. Honestly I thought would be harder, but the documentation is pretty neat and there are plenty of samples to look around. It took me more to break down the code into small subclasses or responsibilities (API clients, shared types and base services) that hacking the main services. Most of the time was spent on refactoring and creating modular pieces and dealing with issues about how to create shared libraries, folder structure, conflicts with GOPATH variable, etc. A tip here, remember to configure properly GOPATH variable and if possible add it to your profile script (zsh, bash or your favourite)
+
++ Go is not a OO language per se as we are used in the JAVA world, for example classes and inheritance is not implemented as we would expect.
+You can have a look to the client/types package where we define the structs that map our Json responses.
+
++ Functions in go can return multiple values. Used mostly to return both a result and an errors
+
+```go
+  client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Do: ", err)
+		return record
+	}
 ```
++ Parsing parameters using "flag" is a nice approach.
+
++ Http client request/response and JSON deserialization is as easy as can be with standard libraries.
+The standard Go libraries (http and encoding/json) do the job pretty well so we can submit GET, POST
+and any HTTP verbs, and parse the response seamesly into a Go struct with a few lines of code.
+
+[Json-to-GO][8] is an excellent tool that instantly converts JSON into a Go type definition. I used it to create the struct types defined on the **types** folder.
+
++ The [Gin HTTP framework][1] is great.
+
++ Usage of the init() method - Use it as a way to guarantee that specific bits of your code are invoked immediately before main method is executed
+
++ Usage of runtime.Goexit() - It´s a way to leave the main flow, but if there were any other coroutines triggered before those ones will remain alive.
+Used in the **receiver.go** to be sure that server keeps listening
+
++ IDE - Recently I started using VS Code as text editor. Found out that there is a Go plugin which did the job for a newbie. You need to configure a setting "go.gopath" in VS code in order to inform the IDE where you Go code lives. Something that annoyed me (slightly) was that IDE tries to compile all the services within the same package, raising fake errors for example because a function or main methods is duplicated in more than one service. Probably a reminder that each microservice should live in its own package ;)
+
++ I love the fact that the size of the executable is really small (around 13Mb)
++ Building and installing shared libraries is not that hard once you get the hang of it, just need to remember and learn folder structure.
 
 # Pending bits
 
@@ -638,7 +672,7 @@ The whole code repository is [here][6]
 + [NATS home page][3]
 + [How to write Go code][4]
 + [Dependency management with Go][5]
-+ [Github repository for the microservices][6]
++ [Github repository for the microservices ][6]
 + [Kong API Gateway][7]
 + [Json-to-GO][8]
 
@@ -647,6 +681,6 @@ The whole code repository is [here][6]
 [3]: https://nats.io/
 [4]: https://golang.org/doc/code.html
 [5]: https://github.com/golang/dep
-[6]: https://mfarache.github.io/mfarache/Building-microservices-with-go/
+[6]: https://mfarache.github.io/mfarache/Functions-As-A-Service-OpenFaas/
 [7]: https://getkong.org/
 [8]: https://mholt.github.io/json-to-go/
