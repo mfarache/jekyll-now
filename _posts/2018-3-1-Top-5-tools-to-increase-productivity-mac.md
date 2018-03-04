@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Top 3 bash tools to increase your productivity as a developer using Mac
+title: Useful bash commands tools to increase your productivity as a developer using Mac
 tags: [ Bash, MacOsx, fzz, pecos, oh-my-zsh  ]
 ---
 
@@ -66,7 +66,7 @@ source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 From now on, the plugin will suggest you commands. In case more than one command is available you can swith among them just pressing the arrow keys.
 
 
-# 3. peco
+# 2. peco
 
 It's a interactive filtering tool. 
 
@@ -79,14 +79,11 @@ The tool allows selection of single match, multiple matchs selection and it flex
 Simple usages would be 
 
 ```bash
+#browse history
 history | peco
-```
-
-```bash
+#inspect processes
 ps -aux | peco
-```
-
-```bash
+#find Python files
 find . -name "*.py" -print | peco
 ```
 
@@ -174,9 +171,11 @@ to get back and search simple things like how to iterate over dictionary keys wi
 Some interesting options like search within zip files or binaries, using regexp expressions make the tool a made match in heaven compared with the verbosity of the grep command sintax and mainly its speed.
 
 ```bash
-time ag FlinkOutput -G java                                                                                        ✓   0.06s user 0.10s system 118% cpu 0.132 total
+time ag FlinkOutput -G java
+0.06s user 0.10s system 118% cpu 0.132 total
 
-time grep -r --include "*.java" FlinkOutput .                                                                      ✓  0.26s user 0.21s system 96% cpu 0.488 total
+time grep -r --include "*.java" FlinkOutput . 
+0.26s user 0.21s system 96% cpu 0.488 total
 
 time find . -name "*.java" -exec grep -i 'FlinkOutput' {} \;  
 0.65s user 0.63s system 81% cpu 1.567 total
