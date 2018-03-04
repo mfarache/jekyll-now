@@ -8,7 +8,7 @@ A few tips on awesome bash tools you can install to improve your productivity as
 
 # Why bother?
 
-As developers we spend a lot of time executing bash commands in our terminal. We are not fully inmersed in our IDE, often we swith in to 'black scree mode'. We can type bash commands manually, for sure..but we often make silly mistakes that need to be amended as we are not professional typewriters. 
+As developers we spend a lot of time executing bash commands in our terminal. We are not fully inmersed in our IDE, often we switch in to 'black scree mode'. We can type bash commands manually, for sure..but we often make silly mistakes that need to be amended as we are not professional typewriters. 
 
 Other approach is using our cheat sheet full of commands that we have handy, but we need to search for the command, copy and paste and some valuable seconds are lost in those operations.
 
@@ -63,7 +63,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosugges
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 ```
 
-From now on, the plugin will suggest you commands. In case more than one command is available you can swith among them just pressing the arrow keys.
+From now on, the plugin will suggest you commands. In case more than one command is available you can switch among them just pressing the arrow keys.
 
 
 # 2. peco
