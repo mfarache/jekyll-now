@@ -141,11 +141,18 @@ These are just sample commands that I need on a daily basis, so feel free to add
  }
 ```
 
-# 3. fzz
+# 3. fzf
 
 Before I discovered pecos I used to hit the Search sequence (Ctrl + R) in order to search for past commands in my history file. Although it works like a charm, it relies on your memory so if you do not remember a specific text bit of command, sometimes you can spend more time than you wanted searching than typing again. 
 
 I think [fzf - command line fuzzy finder][7] beats that approach. It falls in the category of command line finders with several search patterns like prefix-exact-match, suffix-exact-match, exact-match, inverse-exact-match and inverse-suffix-exact-match.
+
+You can install it with 2 simple steps
+
+```bash
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
+```
 
 ```bash
 find . -name "*.py" -print | fzf
@@ -157,7 +164,7 @@ As we saw with peco, options are infinite once you combine it with alias or func
 
 A full catalog of cool things can be seen at [fzf - functions examples][9], so give it a go
 
-# 4. The silver search
+# 4. The silver searcher
 
 How many times do you search for specific way of doing things on your favourite language. There is many boilerplate code that you have done in the past and you wish you had handy to reuse some lines, or have a look some trick you did with a library, etc. 
 
@@ -173,7 +180,7 @@ Both are oriented to search across code files ignoring .git and .svn files.
 Eventually after seeing the results and speed, clearly the winner is  ag, way faster and with a lot of options.
 
 ```bash
-brew install the_silver_search
+brew install the_silver_searcher
 ```
 For example lately I've been messing with Python, so is a new language for me. Therefore I still need to search for silly things (i.e how to iterate over dictionary keys with an index). I could ask Google, browse the results to end up selecting the most voted post in StackOverflow .... or I could search within my codebase (if i remember some key word)
 
