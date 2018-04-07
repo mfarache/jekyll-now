@@ -72,47 +72,47 @@ Port: 8081
 package main
 
 import (
-	"flag"
-	"fmt"
+    "flag"
+    "fmt"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 )
 
 type typeContent struct {
-	title   string
-	genre   string
-	summary string
+    title   string
+    genre   string
+    summary string
 }
 
 type keyContent struct {
-	Key string
+    Key string
 }
 
 var (
-	port    = flag.String("port", "8081", "Listeninng port")
-	assetDB = make(map[keyContent]typeContent)
+    port    = flag.String("port", "8081", "Listeninng port")
+    assetDB = make(map[keyContent]typeContent)
 )
 
 func init() {
-	flag.Parse()
+    flag.Parse()
 }
 
 func createAssetDB() {
-	assetDB[keyContent{"123"}] = typeContent{"It", "horror", "A very scary movie"}
-	assetDB[keyContent{"456"}] = typeContent{"Terminator", "action", "Summary for terminator"}
-	fmt.Printf("%+v\n", assetDB)
+    assetDB[keyContent{"123"}] = typeContent{"It", "horror", "A very scary movie"}
+    assetDB[keyContent{"456"}] = typeContent{"Terminator", "action", "Summary for terminator"}
+    fmt.Printf("%+v\n", assetDB)
 }
 
 func createVideoContentRouter() *gin.Engine {
 
-	createAssetDB()
+    createAssetDB()
 
-	r := gin.Default()
+    r := gin.Default()
 
-	r.GET("content/asset/:assetId", handleGetContent)
-	r.POST("content/asset/:assetId", handlePostContent)
+    r.GET("content/asset/:assetId", handleGetContent)
+    r.POST("content/asset/:assetId", handlePostContent)
 
-	return r
+    return r
 }
 
 func handleGetContent(c *gin.Context) {

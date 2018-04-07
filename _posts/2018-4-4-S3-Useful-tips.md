@@ -28,18 +28,25 @@ There is no impact on performance though, so if you have 1M objects in a bucket 
 # Be aware of limitations
 
 Bucket names must be unique across all regions. 
+
 They should be DNS compliant (should not contain uppercase letters or underscores)
+
 S3 bucket names cannot be renamed.
+
 S3 buckets cannot be deleted unless they are empty using API calls.
+
 Up to 100 buckets per account
 
 # Protect your data 
 
 You can set default encryption on a bucket so that all objects are encrypted when they are stored in the bucket.
+
 Encryptionh happens before asset is written. Decryption occurs on download.
+
 There are two types provided out of the box (Amazon S3-managed keys (SSE-S3) , AWS KMS-managed keys (SSE-KMS))
 
 Once we have defined our bucket we can assign them policies about which actions can be performed on the bucket
+
 The typical uses cases allow access to a specific IAM users and define which operations the user can perform on the bucket 
 
 ```bash
@@ -66,8 +73,11 @@ Do not ever make your bucket public (unless you have a very good reason to do th
 # Versions
 
 Versioning automatically keeps up with different versions of the same object. 
+
 By default versioning is not enabled. Once you enable it, every time you store the same object in a bucket the old version is still stored in your bucket, and it has a unique Version ID so that you can still see it, download it, or use it in your applications.
+
 Versioning is configured at bucket level.
+
 Deleting objects with versioning enabled, leads to not being able to access your object directly. Instead you can access using version identifier.
 There is no way back once you have configured versioning in a bucket.
 
@@ -75,6 +85,7 @@ There is no way back once you have configured versioning in a bucket.
 
 S3 provides definition of lifecycle rules in order to determine how your data expires, moves across different storage pricing schemas.
 For example if we have versioning enabled we could end up with a bunch of data.
+
 It may result obvious (or not) but versioning imply more costs, as the amount of data grows to keep those versions.
 What if is unlikely that you need access to those versions in the short/medium term future? 
 We could write a rule that moves our object into Glacier after 30 days and after one year it removes permanently. 
@@ -83,7 +94,9 @@ We could write a rule that moves our object into Glacier after 30 days and after
 
 It can be enabled/disabled at bucket level. 
 It provides faster transfer of files over long distances (not close to the bucket's region )
+
 It uses Amazon CloudFront edge locations. 
+
 As the data arrives at an edge location, data is routed to Amazon S3 via an optimized network path.
 
 ```bash
@@ -95,17 +108,20 @@ bucketname.s3-accelerate.amazonaws.com
 It can be enabled/disabled at bucket level.
 Usually owner account is who pays the cost of storing and transfering data.
 With Request Pays the requester instead of the bucket owner pays the cost of the request and the data download 
-Useful to share big data sets, owner should not be paying by downloaders.
+
+Use cases are if you want to share big data sets, owner should not be paying by downloaders.
+
 Anonymous access to bucket is not permitted.
 
 # Signed URLS
 
 It's a good practice to use AWS SDK libraries that sign S3 URLs based on Amazon S3 supports Signature Version 4.
 We need to provide AWS credentials, algorithm and region.
+
 Why we want to do that? 
-It's a way to verify the authenticity of the requester - not everyone should have credentials on a AWS user account
-It's a way to avoid someone messing with the signed portion of the request - they expire in 15minutes  
-It's a way to avoid request tampering, as AWS decodes the request on the server side so they should match.
++ It's a way to verify the authenticity of the requester - not everyone should have credentials on a AWS user account
++ It's a way to avoid someone messing with the signed portion of the request - they expire in 15minutes  
++ It's a way to avoid request tampering, as AWS decodes the request on the server side so they should match.
 
 # Testing S3 in isolation
 
@@ -141,10 +157,6 @@ $ $GOPATH/bin/goofys <bucket:prefix> <mountpoint>
 
 + [s3Proxy][1]
 + [Goofys][2]
-+ [URL shortener github repository][3]
-+ [Remote Debugging openFaas apps][4]
-+ [Improve logging for functions during erorr][5]
-+ [Functions as a service with OpenFaaS][6]
 
 [1]: https://github.com/gaul/s3proxy
-
+[2]: https://github.com/kahing/goofys
