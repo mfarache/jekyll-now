@@ -34,16 +34,16 @@ or would I give it a go to the new kid of the block: Micronaut,  which claims to
 Let's see first why I may feel tempted to give it a go and why all the fuzz around.
 These are some rough ideas in no particular order of importance. I will let you score which ones you prefer.
 
-* JVM-based architecture, can be run with Java, Kotlin and Groovy.
+* JVM-based architecture, **can be run with Java, Kotlin and Groovy**.
 
 This is nice although not different from what its Spring competitor provides.
 
-* Natively cloud native.
+* Natively **cloud native**.
 
 Instead of adding packages micronaut has been built from the scratch with the cloud in mind.
-This area will be the focus of our post. We will see how it supports support for common patterns in microservices like service discovery & registration, circuitbreaker, retries, distributed tracing tools, and support of cloud runtimes, mainly AWS (probably a new post).
+This area will be the focus of our post. We will see how it supports support for common patterns in microservices like **service discovery & registration, circuitbreaker, retries, distributed tracing tools, and support of cloud runtimes**, mainly AWS (probably a new post).
 
-* Fast, dazzling fast!  in comparison with Spring.
+* Fast, **dazzling fast!**  in comparison with Spring.
 
 I was made aware by my workmate  ( hello Jose! ) that Spring 5 have added a significant change on its core container. Before Spring 5 , the candidates component identification for injection was based on classpath scanning. As the number of classes available on the path increases, the start-up time of spring boot apps will increase accordingly. Now Spring 5 builds a file candidate list during compilation time. 
 So regardless the number of classes, the time access components is linear.
@@ -69,21 +69,21 @@ Spring already provides Spring MVC Web Functional Reactive framework using Monos
 Micronaut comes with the hyper-fast speedy fully Reactive non-blocking compliant servers Netty.
 Netty uses NIO to achieve better throughput, lower latency and less resource consumption that tomcat or Jetty.
 Using Netty in Spring is possible as web applications built on a Reactive Streams API can be run Netty, Undertow, and Servlet 3.1+ containers.
-Being said this, Micronaut brings Netty Out-Of-the-box, so you do not need to do absolutely anything.
+Being said this, **Micronaut brings Netty Out-Of-the-box**, so you do not need to do absolutely anything.
 
-* Created by the Graeme Rocher, the guy behind Groovy Grails.
+* Created by the **Graeme Rocher**, the guy behind Groovy Grails.
 
 I had the chance to work with Grails in 2008 and from what I remember I see lot of ideas from that old framework that have been migrated from it and are common practices on today's frameworks. So to me this guy is a visionary. He brought things from Ruby on Rails into Groovy. 
 Let me describe a few things that were available on Grails 10 YEARS AGO!
 
-    * REPL ( Read-Eval-Print-Loop) has been added recently to Java 9, shame on you!
-    * Command line, project scaffolding - now we have Spring Roo, Jhipster
-    * Grails Database migrations - now we have Liquibase or Flyway 
-    * GORM - Awesome counterpart on the Groovy family with Hibernate.
++ REPL ( Read-Eval-Print-Loop) has been added recently to Java 9, shame on you!
++ Command line, project scaffolding - now we have Spring Roo, Jhipster
++ Grails Database migrations - now we have Liquibase or Flyway 
++ GORM - Awesome counterpart on the Groovy family with Hibernate.
 
-So in summary if this guy has spent time to sit back and come up with a new framework I will be interested on knowing what is inside. 
+So in summary,  if Graeme has spent time to sit back and redesign a new framework, I need to dig deeper on it to figure out its potential and how we can use it in the future. 
 
-I had to deal with some errors in the gitter channel https://gitter.im/micronautfw/questions and want to take this opportunity to thank him , as he was incredible useful and efficiente  whenever I had a question. 
+I had to deal with some errors in Micronaut gitter channel and I want to take this opportunity to thank him. Graeme was incredible useful and efficiente  whenever I had a question. 
 
 I hope now I have at least get your attention?
 
@@ -126,11 +126,10 @@ The billing service exposes 3 REST endpoints:
 ```java
 @Controller("/billing")
 @Validated
-public class TicketController {
-	
-	HashMap<String, Ticket> billsPerCustomer = new HashMap<>();
-	
-	@Get("/reset/{customerName}")
+public class TicketController {	
+    HashMap<String, Ticket> billsPerCustomer = new HashMap<>();
+
+    @Get("/reset/{customerName}")
     public HttpResponse resetCustomerBill(@NotBlank String customerName) {
     	    billsPerCustomer.put(customerName, new Ticket());
     	    return HttpResponse.ok();
@@ -164,22 +163,21 @@ The first attempts spinning our microservice was not succesful. So I added a uni
 # FEATURE 1: Automatic client generation
 
 I will take this chance to show a cool feature of the framework: automatic client generation
-We just need tp create an interface or abstract class with the annotation @Client and define the same methods we declared in our Controller. Micronaut will do the rest and provide an automatically generated Http client ready to be used in our test.
+
+We just need to create an interface or abstract class with the annotation @Client and define the same methods we declared in our Controller. Micronaut will do the rest and provide an automatically generated Http client ready to be used in our test.
 
 ```java
 @Client("/billing")
 public interface TicketControllerClient {
-	
-	@Get("/reset/{customerName}")
+
+    @Get("/reset/{customerName}")
     public HttpResponse resetCustomerBill(@NotBlank String customerName);
 
-	 @Post("/addBeer/{customerName}")
-	 HttpResponse<BeerItem> addBeerToCustomerBill(@Body BeerItem beer, @NotBlank String customerName);
-		   
+    @Post("/addBeer/{customerName}")
+    HttpResponse<BeerItem> addBeerToCustomerBill(@Body BeerItem beer,@NotBlank String customerName);
 
-	 @Get("/bill/{customerName}")
-	 public Single<Ticket> bill(@NotBlank String customerName);
-	    
+    @Get("/bill/{customerName}")
+    public Single<Ticket> bill(@NotBlank String customerName);    
 }
 ```
 
@@ -187,11 +185,9 @@ Now the client is ready to be used it in our test:
 
 ```java
 public class TicketControllerTest {
-	
-	private final String USERNAME="Johh Doe";
-	private final String BEER_NAME="mahou5x";
-	
 
+    private final String USERNAME="Johh Doe";
+    private final String BEER_NAME="mahou5x";
     private EmbeddedServer server;
     private TicketControllerClient client;
 
@@ -201,18 +197,18 @@ public class TicketControllerTest {
         this.client = server.getApplicationContext().getBean(TicketControllerClient.class);
         client.resetCustomerBill(USERNAME);
     }
-    
+        
     @Test
     public void shouldAddNewBeer() {
-    		BeerItem beerItem = new BeerItem(BEER_NAME, BeerItem.Size.MEDIUM);
-    		HttpResponse<BeerItem> response = client.addBeerToCustomerBill(beerItem, USERNAME);
-            assertEquals(response.body().getName(), BEER_NAME);
+        BeerItem beerItem = new BeerItem(BEER_NAME, BeerItem.Size.MEDIUM);
+        HttpResponse<BeerItem> response = client.addBeerToCustomerBill(beerItem, USERNAME);
+        assertEquals(response.body().getName(), BEER_NAME);
     }
-    
+
     @Test
     public void shouldGetTicketWithZeroWhenCustomerDidNotOrderBeers() {
-    		Single<Ticket> response = client.bill(USERNAME);
-            assertEquals(response.blockingGet().getCost(), 0,0);
+        Single<Ticket> response = client.bill(USERNAME);
+        assertEquals(response.blockingGet().getCost(), 0,0);
     }
 
     @After
@@ -522,7 +518,7 @@ public class NoCostTicket implements TicketControllerClient{
 
 I think that is it for now. Overall I scratched just the surface but I see a powerful set of features that would make development of cross-concerns related to microservices a breeze to play with.
 
-In next installment of Micronaut series I plan to explore other interesting concepts such us reactive endpoints, distributed configuration, distributed tracing and integration with AWS serverless functions.
+In next installment of Micronaut series I plan to explore other interesting concepts such us **reactive endpoints**, **distributed configuration**, **distributed tracing** and integration with AWS **serverless functions**.
 
 
 
