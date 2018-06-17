@@ -4,7 +4,7 @@ title: Building microservices with Micronaut
 tags: [ Micronaut, microservices, consul ]
 ---
 
-I will provide some reasons why is worthy to give it a go to Micronaut in order to implement a microservices.
+I will explore how [Micronaut framework][1] frameworkme can helps to speed up development in a microservices architecture using well known patterns.
 
 ![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
 
@@ -519,6 +519,12 @@ public class NoCostTicket implements TicketControllerClient{
 I think that is it for now. Overall I scratched just the surface but I see a powerful set of features that would make development of cross-concerns related to microservices a breeze to play with.
 
 In next installment of Micronaut series I plan to explore other interesting concepts such us **reactive endpoints**, **distributed configuration**, **distributed tracing** and integration with AWS **serverless functions**.
+
+# Useful links
+
++ [Micronaut framework][1]
+
+[1]: http://micronaut.io/
 
 
 
