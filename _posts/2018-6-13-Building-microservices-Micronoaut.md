@@ -4,7 +4,7 @@ title: Building microservices with Micronaut
 tags: [ Micronaut, microservices, consul ]
 ---
 
-I will explore how [Micronaut framework][1] frameworkme can helps to speed up development in a microservices architecture using well known patterns.
+I will explore how [Micronaut framework][1] framework can helps to speed up development in a microservices architecture using well known patterns.
 
 ![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
 
@@ -113,7 +113,9 @@ The scenario could be as follows:
 * Waiter retieves the bill from the Ticket Billing and delivers it to the Customer.
 
 I will highlight some of the interesting bits while developing the service.
-The full code can be found on my personal github account
+The full code can be found on my [personal github account][2]
+
+https://github.com/mfarache/micronaut-ms
 
 The billing service exposes 3 REST endpoints:
 
@@ -523,8 +525,10 @@ In next installment of Micronaut series I plan to explore other interesting conc
 # Useful links
 
 + [Micronaut framework][1]
++ [Source code of this post][2]
 
 [1]: http://micronaut.io/
+[2]: https://github.com/mfarache/micronaut-ms
 
 
 
