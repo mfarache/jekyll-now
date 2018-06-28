@@ -4,7 +4,7 @@ title: Building microservices with Micronaut
 tags: [ Micronaut, microservices, consul ]
 ---
 
-I will explore how [Micronaut framework][1] framework can helps to speed up development in a microservices architecture using well known patterns.
+I will explore how [Micronaut framework][1] framework can help to speed up development in a microservices architecture using well known patterns.
 
 ![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
 
@@ -278,7 +278,7 @@ Commenting the port setting in our configuration file is enough
 ```
 
 Also our Billing service needs to register itself. We just need to enable it and define where our registry service is listening.
-Micronaut supports Eureka,Consul and Kibernetes just by adding a new line!
+Micronaut supports Eureka,Consul and Kubernetes just by adding a new line!
 We will use Consul. Be sure your application.properties contains the following configuration
 
 ```yaml

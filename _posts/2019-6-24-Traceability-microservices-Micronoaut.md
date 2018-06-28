@@ -1,0 +1,102 @@
+---
+layout: post
+title: Building microservices with Micronaut 
+tags: [ Micronaut, microservices, consul ]
+---
+
+The second post around microservices with [Micronaut framework][1] will explore **distributed configuration**, **distributed tracing** and integration with AWS **serverless functions**.
+
+![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
+
+# Why another framework?
+
+We will pick it up from where we left in our previous post. We used a beer bar context to introduce our microservices.
+
+A bar tender service which is ready to serve beers to multiple customers and get track of the costs to prepare the customer bill once our customer asks for it.
+
+![_config.yml]({{ site.baseurl }}/images/MICRONAUT-BEERS.png)
+
+If you remember we introduced some awesome annotations that make a piece of cake to enable common or frequent microservices patterns like **service registry and discovery**, **circuit breaker** and **retry**
+
+So we will evolve our code to add more features and see [Micronaut framework][1] in action. 
+
+# DISTRIBUTED CONFIGURATION
+
+If you are a developer you have faced multiple times the dilemma of designing components of your system that can be flexible enough to cope with future changes. 
+In order to accomplish that task probably you have defined a set of properties or configuration values that define the behaviour of your components. Most of the times those configuration values are related with the coordinates of servers with their ports, usernames and passwords (those should be encrypted!), endpoint paths, database or queue names, topics, you name it.  In other occasions you may have list of predefined values that are not worthy to persist in the database or you feel lazy enough to do it. Yes everyone has been there...
+
+Trying to remember the approaches anyone could chose in the old times in the Java world these were my options 
+
+* Using JNDI resources, yes it was a thing when you were handling App Servers like BEA Weblogic, Tomcat or any App Server. I think it did not get too much traction, because no one wanted to be the admin of the app server.. so luckily now we tend to use from that path.
+
+* Usign properties files
+It's one of the most common approaches with many sub-variants like .. shall I use a plain key value list, or xml.. or yaml. Should the application detect whenever the file changes to reload its properties or shall I Implement something behind the scenes? What about a observer pattern? What happen to the beans that were initialized with a value and suddenly that value is not valid any longer? 
+
+* Using environment variables:
+According to the 12 Factor methodology this is the way to go. And I guess their statement is right mainly because environment variables are easy to changes across environments, there is no need of restart as far as you sync the values often. Another important bit is that no matter which language we use they way to access to their value is pretty straightforward. Now we have CI tools like Puppet, Chef,etc that allow automate the creation of variables organized in several modules / recipes. 
+
+* Using database: 
+It may seem a bit overwhelming, but there are certain values that fit well on these mechanism. Coming from my Vignette CMS expertise, I've seen everything to be treated as an object that could be edited and published. And yes configuration was one of the most important objects in our cms. Stored as Json or XML we kept values that allowed to modify completely layout, behaviour, timeouts, servers, credentials, A-N-Y-T-H-I-N-G.-
+
+* Using a configuration repository
+I stumbled upon Spring Configuration Server and I really enjoyed seeing how with the right structure you could manage the configuration of your system using Git and a set of files. And those files values were injected directly in our Java beans and defining the @Refresahble scope you could defien "hooks" that will update automatically the value of your member attribute whenever the file was commited/pushed against the repo.
+
+With the arrival of microservices, in a IOT world heavily interconnected via REST API (http, grpc) or Messaging protocols, chosing the right configuration mechanism is key to success. And here is where our Framework takes an opinionated approach that works nicely.
+
+Are not our properties just set of key text values? Why not using either etcd or Zookeper which keeps the K/V store in a distribited environment? Hang on a minute... In the previous blog entry we used Consul for Service Discovery and Registration of our microservices. In case you were not aware it bring out of the box a KV store too with an API easy to integrate with. 
+
+I think Micronaut follows that path and I wi
+
+One of the main drivers to chose one from the above options was whether or not "hot reload" was a requirements in our application.  
+
+
+# DISTRIBUTED TRACEABILITY
+
+
+# STREAMING EVENTS
+
+Nowadays we see that REST APIs, show syncronous communication patterns where we can disect the flow a request-response approach. Every request is processed by the server and returned in a (hopefully) timely fashion to the client, using HTTP codes to indicate whether request was processed succesfully or not.
+
+The raise of Single Page Aplications who need to refresh its state frequently brings another approach where continuos polling is not longer an option. Although some one may still see it as an option, we should encourage anyone trying to use due to the unnecessary overhead that the server needs to deal with and the excesive network traffic originated by this approach. 
+
+I played a while ago with server side push frameworks like Comet Server in Play. Those were the times of early servlet specificications ranging from 2.3 to 2.5. Then the new 3.1 Servlet specification (JSR 340) opened new posibilities and servlet implemented websockets. We later started to hear about NIO, Netty Async,etc. I personally did some websocket work for a customer in NodeJs in 2012, but since then I did not hget my hands dirty with it again.. till today.  
+
+Let's consider for a moment, that the waiter service now has an additional capability which is inform to our customer about the time it will take to deliver its beer. See how we are changing the paradigm here. Instead of delivering the beer immediately the Waiter will send back information with the time left till the beer is ready. The example is a bit "forced" but I hope you get the idea.
+
+Micronaut promises easy event streaming just by returning data of a specific Publisher<T> type. Micronaut comes with the hyper-fast speedy fully Reactive non-blocking compliant servers Netty. Netty uses NIO to achieve better throughput, lower latency and less resource consumption that tomcat or Jetty.
+
+We will add a new endpoint that will delivered a stream of CounterDown messages. Each message just contains the beer type and the time necessary for preparation. 
+
+Our domain class looks like
+
+And we add the following dependency to our maven file
+
+Lastly we enable our new controller method. 
+
+We will be using websockets so we cannot test directly with Postman or browser.
+I have found the Websocket client chrome plugin that does the job perfectly
+
+
+```java
+@Client(id="billing", path="/billing")
+@Retryable(attempts = "10", delay = "2s")
+public interface TicketControllerClient {
+    ......
+    .......
+```
+
+Well I hope you have enjoyed as much as I did playing with Micronaut. 
+I do not have any doubt it will become a serious contestant to Spring-boot once the community realizes about its powerful features. We have scratched the surface only so I would encourage you to go a bit deeper and get familiar with all the feature set available , do your own research and reach your conclusions. 
+
+Be warned  - Micronaut is here to stay! 
+
+# Useful links
+
++ [Micronaut framework][1]
++ [Source code of this post][2]
+
+[1]: http://micronaut.io/
+[2]: https://github.com/mfarache/micronaut-ms
+
+
+
