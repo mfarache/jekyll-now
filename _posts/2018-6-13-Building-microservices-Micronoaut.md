@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Building microservices with Micronaut 
+title: Building microservices with Micronaut (Part 1)
 tags: [ Micronaut, microservices, consul ]
 ---
 
