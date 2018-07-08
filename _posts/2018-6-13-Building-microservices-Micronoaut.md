@@ -3,8 +3,7 @@ layout: post
 title: Building microservices with Micronaut (Part 1)
 tags: [ Micronaut, microservices, consul ]
 ---
-
-I will explore how [Micronaut framework][1] framework can help to speed up development in a microservices architecture using well known patterns.
+This blog series around microservices with [Micronaut framework][1] will see how it can help to speed up development in a microservices architecture using patterns such **Service Discovery and Registration**, **circuit breaker** and **retries** 
 
 ![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
 
@@ -162,7 +161,7 @@ Also I tried to combine Reactive and non-Reactive endpoints just to compare with
 
 The first attempts spinning our microservice was not succesful. So I added a unit test to reproduce (and hopefully fix the issue). See below
 
-# FEATURE 1: Automatic client generation
+# Automatic client generation
 
 I will take this chance to show a cool feature of the framework: automatic client generation
 
@@ -254,7 +253,7 @@ public class WaiterController {
 So now we have the core of the behaviour, we will start seeing how Micronaut can help us in a microservices environment.
 Our example allows direct communication between Waiter and Billing because Waiter is aware of the coordinates (server and port) where the service is running. However when you start adding more microservices the problems gets more complex. 
 
-# FEATURE 2: Service Discovery and Registration
+# Service Discovery and Registration
 
 Imagine we have multiple Waiters and a single instance of the Ticket Billing service cannot cope with the demand to track Customer tickets. Therefore we need to spin up more instances of the service. But how will the Waiter service know which instance of the billing service needs to get in touch with?
 
@@ -428,7 +427,7 @@ Attempt 9
 {"cost":0.0,"deskId":19508}%
 ```
 
-# FEATURE 4: Retries
+# Retries
 
 Let's face it.. life is not perfect. And sometimes sh*t happens (excuse my english). 
 
@@ -466,13 +465,13 @@ And voila!
 09:25:26.618 [nioEventLoopGroup-1-22] DEBUG i.m.r.i.DefaultRetryInterceptor - Cannot retry anymore. Rethrowing original exception for method: Single bill(String customerName)
 ```
 
-I noticed weird behaviour with timestemps as I would expect certain cadence in the logs, a message every second instead of all of them in one go. After speaking with Graeme Roecher, he told me that the way Retry works is slightly different when your endpoints are reactive. I'm glad I helped some how to diagnose the issue ;) and he fixed very promptly <https://github.com/micronaut-projects/micronaut-core/commit/eb7dd1f274de88ab874c2a70ba1fba6e4bca565e> 
+I noticed weird behaviour with timestemps as I would expect certain cadence in the logs, a message every second instead of all of them in one go. After speaking with Graeme Roecher, he told me that the way Retry works is slightly different when your endpoints are reactive. I'm glad I helped some how to diagnose the issue ;) and he fixed very promptly: (https://github.com/micronaut-projects/micronaut-core/commit/eb7dd1f274de88ab874c2a70ba1fba6e4bca565e)
 
 It is also worth mentioning that on a scenario where we start ONLY Waiter service, when we make a request @Retryable does not gets triggered because apparently the first thing it tries is do a service lookup against Consul, and throws a Service not available exception. Also Graeme suggested that probably the behavior of lookup could be modified if the Retry annotation is present. It would be useful on scenarios where one starts up the whole microservices, and some services depend on others.
 
 If we restart the Ticket Billing service instance, our Waiter will recover automatically and connect to the Billing service.
 
-# FEATURE 5: Circuit Breaker
+# Circuit Breaker
 
 Whenever there is communication between two components there is always a chance for things go wrong.
 What shall we do when there is a failure?  Do we fail silently sending to a message queue to be processed asyncronously later?

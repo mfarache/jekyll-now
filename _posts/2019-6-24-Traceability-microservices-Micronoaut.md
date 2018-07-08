@@ -1,14 +1,12 @@
 ---
 layout: post
-title: Distributed configuration and tracing with Micronaut ( Building microservices - Part 2)
+title: Building microservices with Micronaut (Part 1)
 tags: [ Micronaut, microservices, consul, zipkin ]
 ---
 
 The second post around microservices with [Micronaut framework][1] will explore **distributed configuration**, **distributed tracing** and **server side events**
 
 ![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LOGO.png)
-
-# Progressing with our previous microservice example
 
 We will pick it up from where we left in our previous post. 
 We used a beer bar context to introduce our microservices.
