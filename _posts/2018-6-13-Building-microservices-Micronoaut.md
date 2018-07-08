@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Building microservices with Micronaut (Part 1)
+title: Building microservices with Micronaut (Part I)
 tags: [ Micronaut, microservices, consul ]
 ---
 This blog series around microservices with [Micronaut framework][1] will see how it can help to speed up development in a microservices architecture using patterns such **Service Discovery and Registration**, **circuit breaker** and **retries** 
