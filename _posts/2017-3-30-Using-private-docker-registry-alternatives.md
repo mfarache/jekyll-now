@@ -166,7 +166,7 @@ push registry:5000/<myimage>
 After one day banging my head against the wall , trying every possible alternative or workaround I gave up and went for the simplest solution
 based on hosting images in private repositories in DockerHub.
 
-Really the purpose of my proof of concept is not learning the inner gritty details of security around docker containers, instead try to set the ground to prepare a continuos development pipeline using Jenkins. which will be the base of my next bog entry.
+Really the purpose of my proof of concept is not learning the inner gritty details of security around docker containers, instead try to set the ground to prepare a continuous development pipeline using Jenkins. which will be the base of my next bog entry.
 
 # Useful links
 

@@ -577,7 +577,7 @@ go build queue_listener.go
 
 For clarity I opened several iterm windows, and run on each of them one of the commands.
 Every microservice uses a default port. It can be override via the --port flag.
-Although is a good practice code is still not ready to discover services dinamically so just start them without any parameter.
+Although is a good practice code is still not ready to discover services dynamically so just start them without any parameter.
 
 ```bash
 #Start our NATS server locally ( By default run on localhost:4222 )

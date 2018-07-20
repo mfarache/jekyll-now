@@ -17,15 +17,15 @@ At some point we were challenged by our customer to see what would be the impact
 As our current focus knowledge is mainly around Spring, we started looking to core components from Spring Cloud
 and Netflix OSS to allow separately deployed microservices to communicate with each other. If you are not familiar
 with this stack I will just say that make development of microservices easier as it brings "out of the box" service discovery,
-edge services, gateways, dinamic routing, load balancing, circuit breakers and service registry to start with. 
-As usual with all the Spring libraries, a lotof things can be accomplished using auto configuration and convention over configuration.
+edge services, gateways, dynamic routing, load balancing, circuit breakers and service registry to start with. 
+As usual with all the Spring libraries, a lot of things can be accomplished using auto configuration and convention over configuration.
 
 You will be thinking... what the heck all this rant has to do with Micronaut! I came here to read about this new framework!
 Be patient! 
 
 We never had the chance to implement that change, so question is:
 
-If I had to implement now a microservices project will I stick to that decision? using the 'old Sprig Boot ? 
+If I had to implement now a microservices project will I stick to that decision? using the 'old Spring Boot?
 or would I give it a go to the new kid of the block: Micronaut,  which claims to be "natively cloud native" 
 
 # Welcome to Micronaut
@@ -44,28 +44,28 @@ This area will be the focus of our post. We will see how it supports support for
 
 * Fast, **dazzling fast!**  in comparison with Spring.
 
-I was made aware by my workmate  ( hello Jose! ) that Spring 5 have added a significant change on its core container. Before Spring 5 , the candidates component identification for injection was based on classpath scanning. As the number of classes available on the path increases, the start-up time of spring boot apps will increase accordingly. Now Spring 5 builds a file candidate list during compilation time. 
+I was made aware by my workmate  (hello Jose!) that Spring 5 have added a significant change on its core container. Before Spring 5, the candidates component identification for injection was based on classpath scanning. As the number of classes available on the path increases, the start-up time of spring boot apps will increase accordingly. Now Spring 5 builds a file candidate list during compilation time. 
 So regardless the number of classes, the time access components is linear.
 
 While this seems a significative improvement, Micronaut goes a step ahead or two.
 Annotation metadata is created at compile time, not before. 
 There is no usage of reflection at all, however we know Spring uses reflection for nearly everything.
-So our performace will not get impacted trying to get configuration data to inject components.
+So our performance will not get impacted trying to get configuration data to inject components.
 The magic lies on compile time using Groovy AST transformation or AST processors for Java and Kotlin.
 
-What does it mean? With source-level annotation processing one can create source files during the compilation stage. Typical usages of AST processors are creating anotations, that for example change the source code of beans to guarantee inmutability. Another example can be to prevent using the wrong scope modifiers on our variables (i.e force our variables to be declared as final).
+What does it mean? With source-level annotation processing one can create source files during the compilation stage. Typical usages of AST processors are creating annotations, that for example change the source code of beans to guarantee immutability. Another example can be to prevent using the wrong scope modifiers on our variables (i.e force our variables to be declared as final).
 With this approach, all the metadata related with our classes is stored and Micronaut avoid usage of reflection on runtime. 
 
 * Automatic Client generation.
 
-On top of the previous improvements and thanks again to AST processer there is super-nice feature.
+On top of the previous improvements and thanks again to AST processor there is super-nice feature.
 If you define a server with controllers, there is also the posibility to generate automatically the client code.
 How many times do we need to build several endpoints and we end up building a client library based on httpOK, http-apache or RestAssured? Generally tends to be boilerplate code that does not add any business value but takes time, as it needs to be developed and tested.
 
 * Born reactive and non-blocking.
 
 Spring already provides Spring MVC Web Functional Reactive framework using Monos and Flux.
-Micronaut comes with the hyper-fast speedy fully Reactive non-blocking compliant servers Netty.
+Micronaut comes with the hyper-fast speedy fully Reactive non-blocking compliant server Netty.
 Netty uses NIO to achieve better throughput, lower latency and less resource consumption that tomcat or Jetty.
 Using Netty in Spring is possible as web applications built on a Reactive Streams API can be run Netty, Undertow, and Servlet 3.1+ containers.
 Being said this, **Micronaut brings Netty Out-Of-the-box**, so you do not need to do absolutely anything.
@@ -75,7 +75,7 @@ Being said this, **Micronaut brings Netty Out-Of-the-box**, so you do not need t
 I had the chance to work with Grails in 2008 and from what I remember I see lot of ideas from that old framework that have been migrated from it and are common practices on today's frameworks. So to me this guy is a visionary. He brought things from Ruby on Rails into Groovy. 
 Let me describe a few things that were available on Grails 10 YEARS AGO!
 
-+ REPL ( Read-Eval-Print-Loop) has been added recently to Java 9, shame on you!
++ REPL (Read-Eval-Print-Loop) has been added recently to Java 9, shame on you!
 + Command line, project scaffolding - now we have Spring Roo, Jhipster
 + Grails Database migrations - now we have Liquibase or Flyway 
 + GORM - Awesome counterpart on the Groovy family with Hibernate.
@@ -88,7 +88,7 @@ I hope now I have at least get your attention?
 
 # The beers delivery service 
 
-I will use a simple example in order to see whether or not Micronatu helps me to solve the challenges  when building a solution based on microservices. Let's describe our hyper-simple  scenario. 
+I will use a simple example in order to see whether or not Micronaut helps me to solve the challenges  when building a solution based on microservices. Let's describe our hyper-simple  scenario. 
 
 A bar tender service which is ready to serve beers to multiple customers and get track of the costs to prepare the customer bill once our customer asks for it.
 
@@ -261,7 +261,7 @@ The recommended approach to solve that is use Service Discovery pattern.
 
 Traditional approaches are to use a well known address and resolve that via DNS (not really good for latency and propagation).
 
-Other alternatives imply add a load balancer between services so our service only is aware of the load balancer IP and let the load balancer do the rest. This approach is valid if we know beforehand the number of instances the load balancer will proxy, but in a microservices environment the number of instances of services are scaling up and downn, and the configuration maybe pointing to an instance that is already dead. In order to overcome that the trend is to add sidecar applications together with our microservices that modify in runtime the configuration of our load balancer.
+Other alternatives imply add a load balancer between services so our service only is aware of the load balancer IP and let the load balancer do the rest. This approach is valid if we know beforehand the number of instances the load balancer will proxy, but in a microservices environment the number of instances of services are scaling up and down, and the configuration maybe pointing to an instance that is already dead. In order to overcome that the trend is to add sidecar applications together with our microservices that modify in runtime the configuration of our load balancer.
 
 There is a better solutions which imply that each microservice register itself on startup against a Services Registry. Microservices that need to use that service, will "discover" the service contacting the service registry and resolving its ip by service name. The only drawback is that we need to modify the microservice itself to be aware of the services registry.
 
@@ -269,7 +269,7 @@ And this is where Micronaut gets handy. With minimum configuration you can achie
 
 We will go through the steps to register our Billing Service:
 
-Our billing microservice need dinamic port allocation instead of fixed port to avoid collisions on multiple startup.
+Our billing microservice need dynamic port allocation instead of fixed port to avoid collisions on multiple startup.
 Commenting the port setting in our configuration file is enough
 
 ```yaml
@@ -277,7 +277,7 @@ Commenting the port setting in our configuration file is enough
 ```
 
 Also our Billing service needs to register itself. We just need to enable it and define where our registry service is listening.
-Micronaut supports Eureka,Consul and Kubernetes just by adding a new line!
+Micronaut supports Eureka, Consul and Kubernetes just by adding a new line!
 We will use Consul. Be sure your application.properties contains the following configuration
 
 ```yaml
@@ -360,7 +360,7 @@ We need to add the same dependency to our Waiter Maven POM file.
 However in this case we will use fixed port allocation so we can hit our Waiter service directly.
 
 To be 100% sure the service discovery works we modify again slightly our domain model and our /bill/{customerName} method. Our ticket holds now metadata simulating the desk identifier. 
-For simplicity  we will use the port associated to the server 
+For simplicity  we will use the port associated to the server.
 See below an extract of the changes required on the TicketController.
 
 ```java
@@ -429,7 +429,7 @@ Attempt 9
 
 # Retries
 
-Let's face it.. life is not perfect. And sometimes sh*t happens (excuse my english). 
+Let's face it.. life is not perfect. And sometimes sh*t happens (excuse my English). 
 
 We are thinking on an ideal world where the Waiter gets assigned one of the 3 available desk (Ticket Billing service). If one fails, other would be available right?
 
