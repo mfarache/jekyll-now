@@ -4,7 +4,7 @@ title: Monitoring docker containers using prometheus and grafana
 tags:   [ javamelody, grafana, prometheus, cadvisor, docker]
 ---
 
-We have already covered in previous posts the usage of tools via docker starting from building tools, continuos integration, integration testing. Now is time to share some thoughts about how easy is getting insights of our containers without modifying our applications using Grafana and prometheus
+We have already covered in previous posts the usage of tools via docker starting from building tools, continuous integration, integration testing. Now is time to share some thoughts about how easy is getting insights of our containers without modifying our applications using Grafana and prometheus
 
 # Our current approach for monitoring
 

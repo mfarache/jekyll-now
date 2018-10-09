@@ -23,7 +23,7 @@ We will evolve our code to add more features and see more [Micronaut framework][
 
 If you are a developer you have faced multiple times the dilemma of designing components of your system that can be flexible enough to cope with future changes. 
 
-Probably you have defined a set of properties or configuration values that define the behaviour of your components. Most of the times those configuration values are related with the coordinates of servers with their ports, usernames and passwords (those should be encrypted!), endpoint paths, database or queue names, topics,you name it.  In other occasions you may have list of predefined values that are not worthy to persist in the database or you feel lazy enough to do it. Yes everyone has been there...
+Probably you have defined a set of properties or configuration values that define the behaviour of your components. Most of the times those configuration values are related with the coordinates of servers with their ports, usernames and passwords (those should be encrypted!), endpoint paths, database or queue names, topics, you name it.  In other occasions you may have list of predefined values that are not worthy to persist in the database or you feel lazy enough to do it. Yes everyone has been there...
 
 Trying to remember the approaches anyone could chose in the old times in the Java world these were my options 
 
@@ -33,7 +33,7 @@ Yes, it was a thing when you were handling App Servers like BEA Weblogic, Tomcat
 
 * Using properties files
 
-It's one of the most common approaches with many sub-variants .. shall I use a plain key value list, or xml.. ..or yaml. Should the application detect whenever the file changes to reload its properties or shall I Implement something behind the scenes? What about a observer pattern? What happens to the beans that were initialized with a value and suddenly that value is not valid any longer? Micronaut supports obviusly this approach nicely and has some nice feature that allow mapping entries on your file directly with the attributes of your bean. 
+It's one of the most common approaches with many sub-variants .. shall I use a plain key value list, or xml.. ..or yaml. Should the application detect whenever the file changes to reload its properties or shall I Implement something behind the scenes? What about a observer pattern? What happens to the beans that were initialized with a value and suddenly that value is not valid any longer? Micronaut supports obviously this approach nicely and has some nice feature that allow mapping entries on your file directly with the attributes of your bean. 
 
 * Using environment variables
 
@@ -41,7 +41,7 @@ According to the [12 Factor method](https://en.wikipedia.org/wiki/Twelve-Factor_
 
 And I guess their statement is right, mainly because environment variables are easy to changes across environments, there is no need of restart as far as you sync the values often. Another important bit is that no matter which language we use they way to access to their value is pretty straightforward. 
 
-Now that we have Configuration Management tools like **Puppet**, **Chef** or **Ansible**,etc it's really easy to automate the creation of variables organized in several modules / recipes. 
+Now that we have Configuration Management tools like **Puppet**, **Chef** or **Ansible**, etc it's really easy to automate the creation of variables organized in several modules / recipes. 
 
 * Using database
 
@@ -52,9 +52,9 @@ Stored as Json or XML we kept values that allowed to modify completely layout of
 We could flip feature flags to enable/disable specific behaviour that allowed us to test features for specific 
 users or regions, timeouts, servers, credentials, A-N-Y-T-H-I-N-G. 
 
-However release management was very,very tricky. It was extremely difficult to track if changes to a property were required because they were not under SCM like Git/SVN.
+However release management was very,v ery tricky. It was extremely difficult to track if changes to a property were required because they were not under SCM like Git/SVN.
 Changes were done in the database, and releases had to be carefully crafted to be sure those database values
-where moved or recreated (in case there were environmental dependencies like servers,etc). Also in order to 
+where moved or recreated (in case there were environmental dependencies like servers ,etc). Also in order to 
 "move" properties across different stages (DEV, QA, TST, Live, ..) we had to think on tools to allow incremental export/import of properties everytime we did a release. So you can see that it was  "kind-of-painful" .. 
 
 * Using a configuration repository
@@ -230,9 +230,9 @@ With the proliferation of microservices, observability and traceability it's eve
 
 When you have a mess of services communicating and depending on each other is fundamental to know on real time, why this service failed, how long did it take to perform this request, detect critical paths, learn where are significant delays on processing, in summary help to understand the behaviour of your architecture. Some of them could be solved just with scaling, others will be solved with a redesign of components, but without having a clear view on the issues and how the information flows from service A to Z, there is no way you can tacklet the issue.
 
-There are hyper-simple approaches that may work using correlation-ids that are propagated across services. If you combine that with a Log agregator at least you can trace request, timings,etc but is still based on text log files difficult to troubleshoot. You can do that in old monolithic applications or system where two or three components are involved. But if you start adding more components you will end in a "search-grep-log-hell" nightmare, hopefully I'm not  the only one who has ever been there, right?
+There are hyper-simple approaches that may work using correlation-ids that are propagated across services. If you combine that with a Log agregator at least you can trace request, timings ,etc but is still based on text log files difficult to troubleshoot. You can do that in old monolithic applications or system where two or three components are involved. But if you start adding more components you will end in a "search-grep-log-hell" nightmare, hopefully I'm not  the only one who has ever been there, right?
 
-But really we are here to see how Micronaut can help in this subject by providing specific modules and anotations to integrate either with [Zipkin][4] (created by twitter baseed in Dagger) or [Jaeger][6](opensourced by uber) which are the most popular distributed tracing solutions. I've chosen [Zipkin][4], but reading the documentation, the steps are quite similar if you prefer to do it with [Jaeger][6].
+But really we are here to see how Micronaut can help in this subject by providing specific modules and anotations to integrate either with [Zipkin][4] (created by Twitter based on Dapper) or [Jaeger][6] (opensourced by Uber) which are the most popular distributed tracing solutions. I've chosen [Zipkin][4], but reading the documentation, the steps are quite similar if you prefer to do it with [Jaeger][6].
 
 First we enable tracing by adding the dependency in our pom.xml file
 
@@ -259,7 +259,7 @@ We can either start new spans or add new spans to the existing ones. We can crea
 
 With the addition of zipkin instrumenting libraries we can reach low level detail like http, jdbc, etc. You can imagine you will be interested on knowing  the steps your request went through after hitting the controller, the service and the underlying data access layer.
 
-In JAVA world Zipkin uses Brave behind the scenes which provides instrumentation on different protocols (http, rpc,grpc) or messaging systems like RabbitMq or Kafka. The full list can be found [here](https://github.com/openzipkin/brave/tree/master/instrumentation) 
+In Java world Zipkin uses Brave behind the scenes which provides instrumentation on different protocols (http, rpc,grpc) or messaging systems like RabbitMq or Kafka. The full list can be found [here](https://github.com/openzipkin/brave/tree/master/instrumentation).
 
 We will trace first a couple of method calls in our TicketController.
 
@@ -464,9 +464,9 @@ Browse within Zipkin console to the Dependencies, we can see that Waiter depends
 
 Nowadays we see that REST APIs, show syncronous communication patterns where we can disect the flow a request-response approach. Every request is processed by the server and returned in a (hopefully) timely fashion to the client, using HTTP codes to indicate whether request was processed succesfully or not.
 
-The raise of Single Page Aplications who need to refresh its state frequently brings another approach where continuos polling is not longer an option. Although some one may still see it as an option, we should encourage anyone trying to use due to the unnecessary overhead that the server needs to deal with and the excesive network traffic originated by this approach. 
+The raise of Single Page Aplications who need to refresh its state frequently brings another approach where continuous polling is not longer an option. Although some one may still see it as an option, we should encourage anyone trying to use due to the unnecessary overhead that the server needs to deal with and the excesive network traffic originated by this approach. 
 
-I played a while ago with server side push frameworks like Comet Server in Play. Those were the times of early servlet specificications ranging from 2.3 to 2.5. Then the new 3.1 Servlet specification (JSR 340) opened new posibilities and servlet implemented websockets. We later started to hear about NIO, Netty Async,etc. I personally did some websocket work for a customer in NodeJs in 2012, but since then I did not hget my hands dirty with it again.. till today.  
+I played a while ago with server side push frameworks like Comet Server in Play. Those were the times of early servlet specificications ranging from 2.3 to 2.5. Then the new 3.1 Servlet specification (JSR 340) opened new posibilities and servlet implemented websockets. We later started to hear about NIO, Netty Async, etc. I personally did some websocket work for a customer in NodeJs in 2012, but since then I did not hget my hands dirty with it again.. till today.  
 
 Let's consider for a moment, that we want to know at any time how many users are in our awesome bar.
 But instead of doing a request-response approach we want to monitor how our beloved customers join our bar.
@@ -476,7 +476,7 @@ Micronaut promises easy event streaming just by returning data of a specific Pub
 
 We will add a new endpoint to our TicketController. It will deliver a message saying how many people do we have in our bar, together with our customer names.
 
-Please notices that we added MediaType.TEXT_EVENT_STREAM as media type so we can deliver over http, continuosly.
+Please notices that we added MediaType.TEXT_EVENT_STREAM as media type so we can deliver over http, continuously.
 
 ```java
 @Get(uri = "/users", produces = MediaType.TEXT_EVENT_STREAM)

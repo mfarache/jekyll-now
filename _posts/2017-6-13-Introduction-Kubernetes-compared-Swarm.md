@@ -61,7 +61,7 @@ A semantic tagging that applies to PODs. Useful when scheduling pods across node
 
 ## Service
 It provides a virtual IP adress and a DNS for a set of pods.
-You can see it as a traffic forwarder.  Since Pods can be created and destroyed dinamically, the service gives an abstraction to access using the VIP (regardless the node).
+You can see it as a traffic forwarder.  Since Pods can be created and destroyed dynamically, the service gives an abstraction to access using the VIP (regardless the node).
 It uses IPTables  to achieve that. They keep track of the pods, and forwards traffic using the label
 You can compare with a addressable load balancer with random pod assignment strategy
 
