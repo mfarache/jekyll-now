@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Deployong Micronaut microservices into Kubernetes (Part III)
+title: Deploying Micronaut microservices into Kubernetes (Part III)
 tags: [ Micronaut, microservices, consul, zipkin, helm, kubernetes ]
 ---
 
@@ -836,10 +836,6 @@ Events:
 So now we can access to our service using the cluster ip because our rule will be responsable of rerouting our request into our service with the correct port.
 
 Source code has been updated with a new folder to keep all the K8 files and also the cloned Helm chart from Hashicorp with the modification related to single node instead of 3.
-
-New source code is available at
-
-
 
 
 # Useful links
