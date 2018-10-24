@@ -18,18 +18,17 @@ REST was designed to provide statufulness operations over resources using HTTP v
 Period. 
 
 However there are several scenarios where really REST does not fit very well.
-First is when we have to implement an operation that necessarily does not relate with a single resource. Who has not created sometimes an endpoint to trigger  "something" which
+First that springs to mind is when we have to implement an operation that necessarily does not relate with a single resource. Who has not created sometimes an endpoint to trigger  "something" which
 implies several operations? Or to trigger simply a process? Or to expose the resultset
 of a specific business query? 
 
-If we use REST for inter-service communication you must admit that precious time is wasted spent marshalling / unmarshalling our POJO objects. One of the main drivers on why REST was cool was because using Json or XML we were able to understand what's going on over the wire.
-But for communication inter processes is the right thing to use text protocol when machines are supposed to understand binary protocols?
+If we use REST for inter-service communication you also must admit that precious time is wasted spent marshalling / unmarshalling our POJO objects. One of the main drivers on why REST was so cool was simply because using Json or XML we were able to understand what's going on over the wire. But is that the right thing when machines are supposed to understand binary protocols?
 
 There are also other drawback stemed from the fact that we are using REST over http and some limitation inherent to the protocol itself. At least with Http1.1 there are few things that do not help in terms of efficiency. 
 
 # Welcome gRPC
 
-First reaction probably would be to step back jumping...  as you may associate it with old Remote Procedure Calls in the past. Nightmarish times comes to my mind those times where in the benefit of interoperability we use CORBA, or RMI, etc. Nor the tools were ready for
+First reaction probably would be to step back jumping...  as you may associate it with old Remote Procedure Calls in the past. Nightmarish times comes to my mind those times where in the benefit of interoperability we used CORBA, or RMI, etc. Nor the tools were ready for
 the job and luckily enough EJBs using RMI are something hopefully from the past.
 
 Let's focus our context on microservices intercomunication and let's figure whether or not gRPC may be a good option
@@ -38,7 +37,7 @@ Some of the obvious benefits are:
 
 ## Efficiency
 
-GRPC uses Protobuffer for binary serialization of messages, which gives a lot more efficiency when compared to textual JSON used by REST
+GRPC uses Protobuffer for binary serialization of messages, which gives a lot more efficiency when compared to textual JSON used by REST.
 The efficiency is also better from CPU perspective. Now that we are moving towards a serverless world ruled by virtual instances, lambdas and
 pay-as-you-go models,  CPU efficiency would reduce significantly your monthly bills with your cloud provider.
 As gRPC is pure Binary protocol, there is no need of encode/decode json/xml payload in both ends of the pipe.
@@ -61,7 +60,7 @@ The good thing about grpc is that a definition of a strongly type payload messag
 
 ## Streaming
 
-gRPC takes full advantage of the capabilities of HTTP/2  mechanism 
+gRPC takes full advantage of the capabilities of HTTP/2  mechanism. 
 It supports  streaming at request level (multiple requests sent to the server), at response level (server replies a stream of response), or both request and responses streamed over.
 
 Ok, so if everything is awesome why do we still use REST ? 
@@ -79,7 +78,8 @@ gaming server to cope 3 basic features.
 The server will be able to track scores and users for a subset of games.
 + User may register in the server for a specific game
 + User may submit a score of the game
-+ User may ask for list of users on a game
++ User may request which users are playing the same game
++ User may subscribe to be informed about the ranking hall of fame on a game
 + Server will inform everyone about the hall of fame for a game
 
  ![_config.yml]({{ site.baseurl }}/images/GRPC.jpeg)
@@ -159,18 +159,17 @@ service GamingServer {
 
     rpc GetUsers(Game) returns (stream User) {}
 
-    rpc GetHallOfFame(TopNHallOfFameRequest) returns (HallOfFame) {}
+    rpc GetHallOfFame(TopNHallOfFameRequest) returns (stream HallOfFame) {}
 
 }
 ```
 
 We have 2 options to generate  data access classes and stubs to enable generation of client and servers.
 
-Run the protocol buffer compiler for JAVA ( or your language of choice)
++ Run the protocol buffer compiler for JAVA ( or your language of choice)
 on our .proto file  
 
-Use maven plugin, which is my preferred approach as can be easily automated with our build process.
-
++ Use maven plugin, which is my preferred approach as can be easily automated with our build process.
 
 ```bash
 
@@ -205,7 +204,7 @@ $ tree ./target/generated-sources
 ```
 We can observe a few things from the generated code
 
-+ There is a class with the same name of our proto file (GameServer) 
++ There is a Java class with the same name of our proto file (GameServer) 
 + There is a java class per message type 
 + Defintion of our messages will be done using inmutable objects generatadated via Builder pattern 
 + We have a class GamingServerGrpc which contains base classes to extend from 
@@ -296,15 +295,15 @@ AddUser was the simpler one. We can notice how the response is translated into a
 
 
 Users can subscribe to HallOfFame updates using this method.
-Here I'm not returning the Hall Of Fame inmmediately. 
+Here we do notreturning the Hall Of Fame response inmmediately. 
 Instead we add the observer to a list hallOfFameSubscribers. 
-That list is used whenever we receive new Scores, so we can inform to our clients.
+Whenever we receive new Scores, we can iterate over the subscribers so we can inform to our clients.
+
 Also notice we are not calling "responseObserver.onCompleted()" otherwise stream will be closed
 
-I thing I noticed is that once a message is sent from the server to the client (onNext()), is not possible to send a message again. 
 
 ```c
-  rpc GetHallOfFame(TopNHallOfFameRequest) returns (HallOfFame) {}
+  rpc GetHallOfFame(TopNHallOfFameRequest) returns (stream HallOfFame) {}
 ```
 
 ```java
@@ -312,14 +311,15 @@ I thing I noticed is that once a message is sent from the server to the client (
 	public void getHallOfFame(TopNHallOfFameRequest request, StreamObserver<HallOfFame> responseObserver) {
 		LOG.info("--- getHallOfFame request");
 		Game game = request.getGame();
-		
+
 		if (scorePerGame.containsKey(game)) {
 			hallOfFameSubscribers.add(responseObserver);
 		} else {
-			responseObserver.onError(new IllegalArgumentException("Inexisting Game:" + game.getName() ));
+			responseObserver.onError(new IllegalArgumentException("Inexisting Game:" + game.getName()));
 		}
-		//We do not want to close the stream as we are interested on sending updates to all our consumers when they submit scores.
-		//responseObserver.onCompleted();
+		// We do not want to close the stream as we are interested on sending updates to
+		// all our consumers when they submit scores.
+		// responseObserver.onCompleted();
 	}
 ```
 
@@ -339,13 +339,13 @@ The response is really what what the client sends to the server. Or explained in
 ```java
 	@Override
 	public StreamObserver<Score> addScore(StreamObserver<GamingServerResponse> responseObserver) {
-		
+
 		LOG.info("--- AddScore request");
 
 		return new StreamObserver<Score>() {
 			@Override
 			public void onCompleted() {
-				LOG.info("End of stream");
+				
 			}
 
 			@Override
@@ -359,25 +359,27 @@ The response is really what what the client sends to the server. Or explained in
 				Game game = score.getGame();
 				if (scorePerGame.containsKey(game)) {
 					scorePerGame.get(game).add(score);
-					hallOfFameSubscribers.forEach(subscriber->{
-				    		notifyConsumer(subscriber, calculateTopScores(game, GameServerSettings.HALL_OF_FAME_RANK));
+					hallOfFameSubscribers.forEach(subscriber -> {
+						LOG.info("About to notify: " + subscriber.toString());
+						notifyConsumer(subscriber, calculateTopScores(game, GameServerSettings.HALL_OF_FAME_RANK));
 					});
 					responseObserver.onNext(MessageBuilder.okResponse());
-					
+
 				} else {
 					responseObserver.onNext(MessageBuilder.errorResponse());
-					responseObserver.onError(new IllegalArgumentException("Inexisting Game:" + game.getName() ));
+					responseObserver.onError(new IllegalArgumentException("Inexisting Game:" + game.getName()));
 				}
 				responseObserver.onCompleted();
 			}
 		};
-	}
+}
 ```
 
 ## Building the client
 
-The client abstract the complexities of the HTTP2 transport using concepts like Channels
+The client abstracts the complexities of the HTTP2 transport using concepts like Channels
 to represent the connection to the grpc server.
+
 A channel can manage loadbalancing and decide LB RoundRobin strategy.
 To do that you need a NameResolver and for example we could hook it with Eureka to get the service using the logical NameResolver, but that is out of scope for this blog.
 
@@ -489,6 +491,10 @@ public class BlockingGameServiceClient {
 
 We will focus in the async one eventually as is the most interesting, so we will see how it works spinning server and a couple of clients.
 
+The client will always use the same game, so multiple client instances can contribute to the same Hall Of Fame (remember the server supports multiple games).
+
+To create a more realistic example the client can be parameterized via java args so we can simulate different users accessing our server and submitting random scores.
+
 ```java
 public class AsyncGameServiceClient {
 
@@ -497,16 +503,17 @@ public class AsyncGameServiceClient {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 
-		Channel channel = ManagedChannelBuilder.forAddress(GameServerSettings.HOST, GameServerSettings.PORT).usePlaintext().maxInboundMessageSize(16*1024*1024).build();
-		Game game = MessageBuilder.aGame();
+		Channel channel = ManagedChannelBuilder.forAddress(GameServerSettings.HOST, GameServerSettings.PORT)
+				.usePlaintext().maxInboundMessageSize(16 * 1024 * 1024).build();
+		Game game = MessageBuilder.aGame(GameServerSettings.validGameNames.get(0));
 		User user = MessageBuilder.aUser(args[0], args[1], game);
-		
+
 		async = asyncClient(channel);
 
 		async.addUser(user, new StreamObserver<GamingServerResponse>() {
 			@Override
 			public void onCompleted() {
-				LOG.info("Call to addUser was completed");
+
 			}
 
 			@Override
@@ -517,31 +524,36 @@ public class AsyncGameServiceClient {
 			@Override
 			public void onNext(GamingServerResponse arg0) {
 				LOG.info("addUser - Status:" + arg0.getStatus());
-				
+
 			}
 		});
 
 		Thread.sleep(1000);
 		getUsers(game);
-		
+
 		Thread.sleep(1000);
 		hallOfFame(GameServerSettings.HALL_OF_FAME_RANK, game);
 
-		Thread.sleep(1000);
-		LOG.info("**** Add Score 1");
-		addScore(user.getUsername(), 1000, game);
+		int N = new Random().nextInt(5);
+		int[] values = { N * 1000, N * 2000, N * 3000, N * 4000 };
+		IntStream.of(values).forEach(score -> {
+			try {
+				Thread.sleep(1000);
+				LOG.info("**** Adding score: " + score);
+				addScore(user.getUsername(), score, game);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
 
-		Thread.sleep(100000);		
+		Thread.sleep(100000);
 
 	}
-	
+
 	private static void addScore(String user, int points, Game game) {
-		LOG.info("-- addScore");
 		StreamObserver<Score> scoreObserver = async.addScore(new StreamObserver<GamingServerResponse>() {
 			@Override
-			public void onCompleted() {
-				LOG.info(game.getName() + ": Call to addScore was completed user:" + user );
-			}
+			public void onCompleted() {};
 
 			@Override
 			public void onError(Throwable arg0) {
@@ -555,14 +567,11 @@ public class AsyncGameServiceClient {
 		});
 		scoreObserver.onNext(MessageBuilder.aScore(points, user, game));
 	}
-	
+
 	private static void hallOfFame(int n, Game game) {
-		LOG.info("-- hallOfFame");
 		async.getHallOfFame(MessageBuilder.aTopRequest(game, n), new StreamObserver<HallOfFame>() {
 			@Override
-			public void onCompleted() {
-				LOG.info(game.getName() + ": Call to getHallOfFame was completed");
-			}
+			public void onCompleted() {};
 
 			@Override
 			public void onError(Throwable arg0) {
@@ -571,20 +580,20 @@ public class AsyncGameServiceClient {
 
 			@Override
 			public void onNext(HallOfFame hallOfFame) {
-				hallOfFame.getUsersList().stream().forEach(u->{
-					LOG.info("Hall of fame: Score:" + u.getUsername() + " score:" + u.getPoints());
+				LOG.info("******************* Hall of fame Rank **********************");
+				int[] index = { 1 };
+				hallOfFame.getUsersList().forEach(u -> {
+					LOG.info("******* " + (index[0]++) + " : " + u.getUsername() + " SCORE:" + u.getPoints());
 				});
+				LOG.info("******************* Hall of fame Rank **********************");
 			}
 		});
 	}
-	
+
 	private static void getUsers(Game game) {
-		LOG.info("-- getUsers");
 		async.getUsers(game, new StreamObserver<User>() {
 			@Override
-			public void onCompleted() {
-				LOG.info(game.getName() + ": Call to getUsers was completed");
-			}
+			public void onCompleted() {};
 
 			@Override
 			public void onError(Throwable arg0) {
@@ -609,44 +618,121 @@ We can trigger our server
 
 ```bash
 mvn exec:java -Dexec.mainClass="com.grpc.gamingserver.server.GamingServer" 
+
 ```
-
-Let's start our async client and we can see that we receive a HallOfFame using the open stream we have:
-
+Open a new term session and let's start our async client. We will refer to this as Session#1
 
 ```bash
 mvn exec:java -Dexec.mainClass="com.grpc.gamingserver.AsyncGameServiceClient" -Dexec.args="user1 user1@gmail.com" 
 ````
 
-```bash
-#Output
-Oct 23, 2018 6:48:42 PM com.grpc.gamingserver.AsyncGameServiceClient main
-INFO: Waiting for addUser
-Oct 23, 2018 6:48:43 PM com.grpc.gamingserver.AsyncGameServiceClient$1 onNext
-INFO: addUser - Status:OK
-Oct 23, 2018 6:48:43 PM com.grpc.gamingserver.AsyncGameServiceClient$1 onCompleted
-INFO: Call to addUser was completed
-Oct 23, 2018 6:48:43 PM com.grpc.gamingserver.AsyncGameServiceClient getUsers
-INFO: -- getUsers
-Oct 23, 2018 6:48:43 PM com.grpc.gamingserver.AsyncGameServiceClient$4 onNext
-INFO: Existing User:user2@gmail.com
-Oct 23, 2018 6:48:43 PM com.grpc.gamingserver.AsyncGameServiceClient$4 onCompleted
-INFO: Commando: Call to getUsers was completed
-Oct 23, 2018 6:48:44 PM com.grpc.gamingserver.AsyncGameServiceClient hallOfFame
-INFO: -- hallOfFame
-#here we call hallOfFame. Nothing is returned yet. We just subscribe so we will get notifications when users add score to the server!
-Oct 23, 2018 6:48:45 PM com.grpc.gamingserver.AsyncGameServiceClient main
-INFO: **** Add Score 1
-Oct 23, 2018 6:48:45 PM com.grpc.gamingserver.AsyncGameServiceClient addScore
-INFO: -- addScore
+We can see that every time the user submits a score, he also receive a HallOfFame using the open stream we have. As we have only one user connected to our server he is the only one in the HallOfFame based on the scores submitted by user1. 
 
-Oct 23, 2018 6:48:45 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
-#here we receive an update as consequence of addScore
-INFO: Hall of fame: Score:user2 score:1000
-Oct 23, 2018 6:48:45 PM com.grpc.gamingserver.AsyncGameServiceClient$2 onNext
-INFO: addScore - Status:OK
-Oct 23, 2018 6:48:45 PM com.grpc.gamingserver.AsyncGameServiceClient$2 onCompleted
-INFO: Commando: Call to addScore was completed user:user2
+```bash
+NFO: ******************* Hall of fame Rank **********************
+Oct 24, 2018 12:48:40 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 1 : user1 SCORE:12000
+Oct 24, 2018 12:48:40 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 2 : user1 SCORE:9000
+Oct 24, 2018 12:48:40 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 3 : user1 SCORE:6000
+Oct 24, 2018 12:48:40 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 4 : user1 SCORE:3000
+Oct 24, 2018 12:48:40 PM com.grpc.gamingserver.AsyncGameServiceClient$3 onNext
+INFO: ******************* Hall of fame Rank **********************
+```
+We can spice things a little by adding as many clients as you want, each of them with a different username. To see results clearly is better to execute each command in a different terminal session. We will just create a Session#2 
+
+```bash
+mvn exec:java -Dexec.mainClass="com.grpc.gamingserver.AsyncGameServiceClient" -Dexec.args="user2 user2@gmail.com" 
+````
+
+If we switch back to Session#1 we can see now that the Server is streaming results into the Hall Of Fame considering user1 and user2:
+
+```bash
+INFO: ******************* Hall of fame Rank **********************
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 1 : user1 SCORE:12000
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 2 : user2 SCORE:12000
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 3 : user1 SCORE:9000
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 4 : user2 SCORE:9000
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 lambda$0
+INFO: ******* 5 : user1 SCORE:6000
+Oct 24, 2018 12:50:14 PM com.grpc.gamingserver.AsyncGameServiceClient$3 onNext
+INFO: ******************* Hall of fame Rank **********************
+```
+I also explored unit testing (See and added an example in the source code if you are curious. However seems the stub gets hang while doing the call, and could not figure out why.
+
+```java
+@RunWith(JUnit4.class)
+public class GamingServerTest {
+
+	private static final String USER = "user";
+	private static final String USER_GMAIL_COM = "user@gmail.com";
+
+	@Mock
+	GameService gameService;
+
+	@Rule
+	public GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+
+	private String serverName;
+	private InProcessServerBuilder serverBuilder;
+	private InProcessChannelBuilder channelBuilder;
+
+	@Before
+	public void init() {
+		MockitoAnnotations.initMocks(this);
+		serverName = InProcessServerBuilder.generateName();
+		serverBuilder = InProcessServerBuilder.forName(serverName).directExecutor();
+		channelBuilder = InProcessChannelBuilder.forName(serverName).directExecutor();
+		registerServiceAndStart();
+	}
+
+	@Test
+	public void clientCallShouldTriigerAddUserInTheServer() {
+		GamingServerBlockingStub blockingClient = GamingServerGrpc.newBlockingStub(getChannel());
+		GamingServerResponse response = blockingClient.addUser(aUser(aGame()));
+		assertEquals(StatusType.OK, response.getStatus());
+
+		Mockito.verify(gameService).addUser(Mockito.argThat(new ArgumentMatcher<User>() {
+			@Override
+			public boolean matches(Object argument) {
+				User user = (User) argument;
+				return user.getEmail().equals(USER_GMAIL_COM) && user.getUsername().equals(USER);
+			}
+		}), Mockito.argThat(new ArgumentMatcher<StreamObserver<GamingServerResponse>>() {
+			@Override
+			public boolean matches(Object argument) {
+				return true;
+			}
+		}));
+	}
+
+	private ManagedChannel getChannel() {
+		return grpcCleanup.register(channelBuilder.build());
+	}
+
+	private void registerServiceAndStart() {
+		try {
+			grpcCleanup.register(serverBuilder.addService(gameService).build().start());
+		} catch (IOException e) {
+			fail();
+		}
+	}
+
+	private User aUser(Game game) {
+		return User.newBuilder().setUsername(USER).setEmail(USER_GMAIL_COM).setGame(game).build();
+	}
+
+	private Game aGame() {
+		Game game = Game.newBuilder().setName("Game").build();
+		return game;
+	}
+}
 ```
 
 There are more interesting topics worthy exploring like performance, mainly how many connection can be kept open in case we were using a service that receives massive connections from multiple connections.
@@ -659,12 +745,13 @@ All the code is availabe here: [Code in github][4]
 + [Securing gRpc server with TLS][2]
 + [Load Balancing][3]
 + [Code in github][4]
-
++ [Clean Grpc resources on your unit tests][5]
 
 [1]: https://grpc.io/docs/tutorials/basic/java.html
 [2]: https://bbengfort.github.io/programmer/2017/03/03/secure-grpc.html
 [3]: https://grpc.io/blog/loadbalancing
 [4]: https://github.com/mfarache/grpc-gaming-server
+[5]: https://grpc.io/blog/gracefully_clean_up_in_grpc_junit_tests
 
 
 
