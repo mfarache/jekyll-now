@@ -53,20 +53,20 @@ The Micronaut guys at Gitter channel were helpful as usual and more specifically
 Eventually everythig was releated to the maven-shade-plugin and how the ResourceTransformer class duplicated jar entries due to transitive dependencies.
 He also highlighted that if waiter depended fully on billing jar, I was exposing the billing endpoints through my waiter microservice! i.e our user could go to the till without even asking our poor waiter.
 
-So I had to refactor the dependencies so is a cleaner architecture. Basically added a couple of modules. One containing only the @Client interface and the @Fallback so they could be used both by the unit test and by our waiter. I also shared the model across projects.
+So I had to refactor the dependencies so is a cleaner architecture. Basically added a couple of modules. One containing only the *@Client* interface and the *@Fallback* so they could be used both by the unit test and by our waiter. I also shared the model across projects.
 
 + billing > billing-client (for unit testing) > model
 + waiter > billing-client > model.
 
 # Creating a function archetype with Micronaut
 
-We will create a new project to declare our function so it has its own release cycle and can be changed independently from the other microservices. Let's imagin that the cost will be based on a simple formula based on brand name, applying a multiplying factor when we deal with pints of beer, so they will
+We will create a new project to declare our function so it has its own release cycle and can be changed independently from the other microservices. Let's imagine that the cost will be based on a simple formula based on brand name, applying a multiplying factor when we deal with pints of beer, so they will
 be more expensive.
 
-I created a new project "beer-cost-function" from the scratch using the Micronaut client 
+I created a new project "beer-cost-function-app" from the scratch using the Micronaut client 
 
 ```bash
-$ mn create-function beer-cost-function
+$ mn create-function beer-cost-function-app
 ```
 
 Although I could use the gradle build, I'm more a maven guy so I mavenized the project using as reference my pom files from beer-billing and beer-waiter. 
@@ -86,8 +86,14 @@ The interesting bits in your pom to enable functions are these 2 dependencies
 			<version>${micronaut.version}</version>
 			<scope>compile</scope>
 		</dependency>
-    </dependency>
 ```
+
+I splitted responsabilities across different projects: 
+
++ client (beer-cost-function-client)
++ model(beer-cost-function-model) 
++ server(beer-cost-function-app) 
+
 
 # Moving to Micronaut Functions
 
@@ -181,6 +187,23 @@ public interface ClientCostCalculator {
 }
 ```
 
+This is the simplest client to our function. 
+
+If we think in AWS Lambda we still may take benefit on some of Micronaut features. We will see later while testing how Lambda execution can take a while to warm up... so is never a bad idea to make our client calls more robuts with a retry policy.
+
+And improved version (ideally configurable externally) could be 
+
+```
+@FunctionClient
+public interface ClientCostCalculator {
+	 @Named("beer-cost")
+     @Retryable(attempts = "3", delay = "2s") 
+	 public Single<TicketCostResponse> apply(@Body TicketCostRequest ticketCostRequest) ;
+}
+```
+
+Our Function test is again straight forward:
+
 ```java
 public class ClientCostCalculatorTest {
 	
@@ -197,15 +220,15 @@ public class ClientCostCalculatorTest {
 }
 ```
 
-
-One IMPORTANT warning to readers trying to implement their own Micronaut functions using POJO objects. 
+One very important warning for those like me who dare to implement their own Micronaut functions using Inmutable POJO objects. 
 
 I scratched my head for a long time till I found the source of weird behaviour when working with inmutable POJOS, i.e without setters and always prefering usage of constructors with parameters. 
 
 So there are two possible approaches. 
+
 + The initial one was kind-of-obviuos, just adding default constructor both in your request (TicketCostRequest) and response (TicketCostRequest) objects. Once added the test worked like a charm.
 
-+ However again using the Gitter channel Graeme was helpful reminding me that in case I want to use Inmutable objects we need to add  @JsonCreator to map the constructor. So eventually I opted by that approach. See an example below on how my Request POJO looks like.
++ Graeme Rocher was helpful as usual in the Gitter channel, kudos to you! . He reminded me that in case I want to use Inmutable objects we need to add  @JsonCreator to map the constructor. So eventually I opted by that approach. See an example below on how my Request POJO looks like.
 
 ```java
 public class TicketCostRequest implements Serializable {
@@ -279,7 +302,7 @@ We are already generating a shadow jar using maven-shade-plugin (see pom.xml)
 
 ```bash
 $ mvn package
-#Generate shaded jar at $HOME/micronaut-ms/beer-cost-function/target/cost-0.0.1-SNAPSHOT-shaded.jar
+#Generate shaded jar at $HOME/micronaut-ms/beer-cost-function-app/target/cost-app-0.0.1-SNAPSHOT-shaded.jar
 ```
 
 ## Configure your lambda
@@ -292,7 +315,7 @@ Just create a new function with a name "beer-cost" with Java 8 runtime and creat
 
 
 
-Just upload the file $HOME/micronaut-ms/beer-cost-function/target/cost-0.0.1-SNAPSHOT-shaded.jar and add as Handler the following value: io.micronaut.function.aws.MicronautRequestStreamHandler
+Just upload the file $HOME/micronaut-ms/beer-cost-function-app/target/cost-app-0.0.1-SNAPSHOT-shaded.jar and add as Handler the following value: io.micronaut.function.aws.MicronautRequestStreamHandler
 
 ## Configure a test event
 
