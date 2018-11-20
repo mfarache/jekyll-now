@@ -79,6 +79,18 @@ You will not be surprised if the read service delegates to a DAO in order to ret
 
 However the behaviour of our write service is slightly different. It will just dispatch  a new command CreateMovieCommand using our bus.
 
+```java
+public class MovieService {
+	
+	@Inject
+	private Bus bus;
+	
+	public void addMovie(Movie m) {
+		bus.handleCommand(new CreateMovieCommand(m));
+	}
+}
+```
+
 # Command & Command Handlers
 
 A command defines an abstraction of an action that needs to be done in our system (Create a movie)
@@ -233,7 +245,7 @@ the second datastore. Good use cases would be flattening a complex domain model 
 # How can we test it? 
 
 See the application.yaml on how everything has been configured
-Our application will start on port 8003 and will try to connect into a local kafka running on port 9092
+Our application will start on port 8083 and will try to connect into a local kafka running on port 9092
 
 ```yaml
 kafka:
@@ -253,7 +265,7 @@ We create a private network
 docker network create app-tier --driver bridge
 ```
 
-We will use that networkso kafka can see the zookeeper server just using the name we declared while starting it.
+We will use that network so Kafka can see our Zookeeper server just using the name we declared while starting it.
 
 Start our Zookeeper instance: 
 ```bash
@@ -325,7 +337,7 @@ As usual all the Source code can be found here: [Source code in github][3]
 
 # Issues with Kakfa ? 
 
-Well, unfortunately I raised an issue in the gitter channel and later in github. Issue was related with the way KafkaBinder bindings body objects [See Issue raised here][2]
+Well, unfortunately I raised an issue in the gitter channel and later in github. Issue was related with the way KafkaBinder bindings body objects [See Issue raised here][4]
 
 The team quickly fixed and I was waiting the solution would work straight away....
 
