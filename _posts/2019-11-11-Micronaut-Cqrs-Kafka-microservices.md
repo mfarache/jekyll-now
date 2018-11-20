@@ -1,16 +1,15 @@
 ---
 layout: post
 title: Apply CQRS pattern to build  microservice with Micronaut and Kafka
-tags: [ micronaut, java, microservices, cqrs ]
+tags: [ micronaut, java, microservices, kafka, cqrs ]
 ---
 
 The following post would describe a basic CQRS framework implementation using Micronaut.
-Micronaut helps us to create Kafka producer and consumers in a snap and using AOP advices
-we will reduce boilerplate code.
-
-![_config.yml]({{ site.baseurl }}/images/MICRONAUT-LAMBDA-FINAL.png)
+Micronaut helps us to create Kafka producers and consumers that we will use as a way to communicate events. 
 
 # Introduction to CQRS
+
+![_config.yml]({{ site.baseurl }}/images/CQRS-hla.png)
 
 The CQRS pattern was introduced a while ago and made famous on the context of Domain Driven Design.
 It stands for Command Query Responsability Segregation and the idea is pretty simple: split the read and write responsabilities.
@@ -50,6 +49,8 @@ Do not forget to  install M2Eclipse for Maven and Maven integration with Eclipse
 
 Our example will handle the creation of movies in a CQRS scenario so we can see how the responsabilities are separated
 
+
+
 Let's assume we have two different data stores - one for updates and other that will act as agregate source for reads. Both of them would be really simple in-memory maps.
 
 The following diagram explains how movie data is persisted in the first data store.
@@ -62,7 +63,7 @@ The following diagram explains how data is queried from the aggregate datasource
 
 Ummmm... are not we missing something?How is possible that we can read from the agregate datastore? where did the agregation step happened? See below
 
-![_config.yml]({{ site.baseurl }}/images/CQRS-events.png)
+![_config.yml]({{ site.baseurl }}/images/CQRS-event.png)
 
 # REST endpoints
 
