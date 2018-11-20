@@ -339,12 +339,12 @@ As usual all the Source code can be found here: [Source code in github][3]
 
 Well, unfortunately I raised an issue in the gitter channel and later in github. Issue was related with the way KafkaBinder bindings body objects [See Issue raised here][4]
 
-The team quickly fixed and I was waiting the solution would work straight away....
+The team quickly fixed it and is available in 1.0.1 release. After updating my bom materials dependencies to 1.0.1, I still see that the message is not sent to Kafka. 
 
-After updating my bom materials dependencies to 1.0.1 I still see that the message is not sent to Kafka. Still more digging required but in order to circumvent the issue 
+Still more digging required ... but in order to circumvent the issue I have provided an alternative implementation (kakfa free), so you only need to:
 
-I have provided an alternative implementation (kakfa free), so you only need to:
 + remove the @Primary annotation from the class KafkaPublisher and add the annotation to AppContextPublisher
+
 + remove the @Primary annotation from the class KafkaCustomEventListener and add the annotation to MovieEventsListener
 
 
