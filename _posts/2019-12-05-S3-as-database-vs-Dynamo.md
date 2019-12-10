@@ -10,7 +10,7 @@ I will collect some thoughts around the factors that one could consider in order
 
 # The contenders: S3 vs DynamoDB
 
-A reasonable dude one may raise is whether we required a full blown NoSQL database or we could live just using S3 Storage system.
+A reasonable doubt one may raise is whether we required a full blown NoSQL database or we could live just using S3 Storage system.
 
 Our contenders will be S3 and DynamoDB.
 
@@ -24,7 +24,7 @@ Let's see how S3 handles eventual consistence and which are some side-effects.
 
 First of all is worthy clarifying that S3 buckets provide strong read after create consistency (new objects). However the eventual consistency happens when updating an objet or deleting it.
 
-An an example, if a process writes to an existing bucket on S3, and immediately afterwards other process reads from it,that read may or may not include the most recent up-to-date data.
+As an example, if a process writes to an existing bucket on S3, and immediately afterwards other process reads from it, that read may or may not include the most recent up-to-date data.
 
 Other tricky situations steem from the fact that operations are cached by key. Why does it matter?  
 
@@ -36,7 +36,7 @@ With DynamoDB you can optionally enforce strong read consistency (By default is 
 
 ## Latency / Throughput
 
-Although S3 is a super-reliable system in terms of not losing your data, I'm afraid we cannot say the same about latency. You can expect times below 400ms, however there is no guarantee that on certain conditions that time can be well over 4secs. If your application cannot cope in that scenario,
+Although S3 is a super-reliable system in terms of not losing your data, I'm afraid we cannot say the same about latency. You can expect times below 400ms, however there is no guarantee that on certain conditions that time can be well over 4secs.
 
 S3 is designed for throughput, not necessarily predictable (or very low) latency.
 In fact its latency is much higher than a real database (be it a sql database, dynamodb, elasticsearch, etc)
@@ -49,9 +49,9 @@ There are some tips on performance that can reduce significantly s3 latency
 
 + Using smart use of object prefixes in an Amazon S3 bucket would imply that reads can be parallelized.
 
-+ Some times you do not need to access the full content of the object in S3. Imagine files where you are aware of its structure, and you are only interested on some metadata located in the header of the file. S3 gives you the ability to send range gets whereby you only get the number of bytes specified on the range.
++ Sometimes you do not need to access the full content of the object in S3. Imagine files where you are aware of its structure, and you are only interested on some metadata located in the header of the file. S3 gives you the ability to send "range gets" whereby you only get the number of bytes specified on the range.
 
-+ In case your requirements are low, low latency but still happy accessing as a key value AWS provides straigt forward integration with ElastiCacheRedis so your application could use lazy load to populate it. An alternative is populating the cache as far as the elements are created in S3 triggering a lambda.
++ In case your requirements are low, low latency but still happy accessing as a key value, AWS provides straigt forward integration with ElastiCacheRedis so your application could use lazy load to populate it. An alternative is populating the cache as far as the elements are created in S3 triggering a lambda.
 
 On the other side DynamoDB is designed for low latency and sustained usage patterns. If the average item is relatively small, especially if items are less than 4KB, DynamoDB is significantly faster than S3 for individual operations.
 
@@ -60,29 +60,27 @@ DynamoDB Global Tables supports multi-master replication, so clients can write i
 ## Atomicity and Transactions
 
 With S3 atomic batch operations on groups of objects are not possible.
-S3 operations generally work on entire items and it’s difficult to work with parts of an individual object.
 
+S3 operations generally work on entire items and it’s difficult to work with parts of an individual object.
 There are some exceptions to this, such as retrieving byte ranges from an object.
 
-Obviously if you have strong requirements on transactionality DynamoDb
-is a clear winner. It also enables multiple writers modifying
-concurrently  properties of the same item, or even append to the same array.
+Obviously if you have strong requirements on transactionality DynamoDb is a clear winner. It also enables multiple writers modifying concurrently  properties of the same item, or even append to the same array.
 
 DynamoDB can efficiently handle batch operations and conditional updates, even atomic transactions on multiple items.
 
 ## Scaling
 
-Although DynamoDB can scale on demand, it does not do that as quickly as S3
+Although DynamoDB can scale on demand, it does not do that as quickly as S3.
+
 There are ways to improve latency using supports secondary indexes, arbitrary queries, and triggers (through Lambda)
+
 Dynamo does not perform well when does not use indexes and is forced to use scans.
 
 ## Reporting
 
 Often reporting and business intelligence requirements are neglected.
 
-Imagine you have built your application and using S3 seemed to fit perfectly based on your latency, consistency and scaling requirements.
-
-Suddenly one day your boss now wants to see some dashboards.And he wants to see them in real time! Agregation, Statistics, or any monthly report he may need. You name it!
+Imagine you have built your application. Using S3 seemed to fit perfectly based on your latency, consistency and scaling requirements. Suddenly one day your boss now wants to see some dashboards.And he wants to see them in real time! Agregation, Statistics, or any monthly report he may need. You name it!
 You would be out of luck, so let's see a few gotchas:
 
 + S3 lacks of search feature out of the box, so we could add  Elastic Search on top of the the S3 bucket itself.
