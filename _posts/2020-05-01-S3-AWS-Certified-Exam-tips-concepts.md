@@ -28,12 +28,10 @@ A bucket can be seen as a top folder structure.
 
 # Consistency
 
-S3 buckets provide strong read after create consistency (new objects).
-However the eventual consistency happens when updating an objet or deleting it.
+- S3 buckets provide strong read after create consistency (new objects).
+  However the eventual consistency happens when updating an objet or deleting it.
 
-The data is spread across multiple devices and facilities for high-availability or disaster recovery.
-
-So once you update an object it may transcur a few seconds till the changes are propagated across different Availability Zones(AZ).
+- The data is spread across multiple devices and facilities for high-availability or disaster recovery. So once you update an object it may transcur a few seconds till the changes are propagated across different Availability Zones(AZ).
 
 Clarification: If we chose storage class Infrequent access with a single zone, there is no eventual consistency as there is no need to replicate across any AZ
 
@@ -126,18 +124,29 @@ In many situations that is enough, however in big corporative environments whith
 - We can wire s3 events with other s3 services such as SNS, SQS or Lambda whenever CRUD operations occur
   on s3 objects.
 
-I will ellaborate a bit more on this last point as we had the chance to use this pattern in our last project.
+# Using S3 events with SNS
 
-It's very common integration patters when building serverless event driven solutions, for example
-when a S3 event triggers a lambda function.
+![_config.yml]({{ site.baseurl }}/images/S3-INTEGRATION.png)
 
-Things to be watched watch are consistency as it may take a while till the object is replicated across every AZ. Luckily enough for us our S3 events arrive via SNS topic, so we could put a SQS reader with a 5 second delay to guarantee that once we go to the bucket the document is there.
+I will ellaborate a bit more on this point sharing our experience from last project.
 
-We used versioning metadata as a "belt and braces" approach.
+It's very common integration patters when building serverless event driven solutions, to trigger
+a lambda function, but instead of triggering directly a lambda is also
+recommeded to use a SNS topic, in case you may benefit from multiple suscribers.
 
-It's a common pattern to process s3 events and retrieve its metadata afterwards.
+Some decisions were taken in order to cope with some small challenges
 
-We re using S3 Standard across multiple AZ's. Therefore there is no guarantee that once we call the getObject (latest) function we retrieve exactly the same document that was source of our event.
-This is due to the eventual consistency across AZ's. Also we do not know if maybe other writer created a new version different to our version.
+- Eventual consistency
 
-If versioning is enabled, we will receive the versionIdentifier that will help us to figure out which is the right object to retrieve.
+It may take a while till the object is replicated across every AZ. Luckily enough for us our S3 events arrive via SNS topic, so we could put a SQS reader with a 5 second delay to guarantee that once we go to the bucket the document is there.
+
+Additionally we used versioning metadata as a "belt and braces" approach. It's a common pattern to process s3 events and retrieve its metadata afterwards. We re using S3 Standard across multiple AZ's. Therefore there is no guarantee that once we call the getObject (latest) function we retrieve exactly the same document that was source of our event. This is due to the eventual consistency across AZ's. Also we do not know if maybe other writer created a new version different to our version.
+
+With "Versioning" enabled, we receive the versionIdentifier as part of the event, which help us to
+know exactly which is the right object to retrieve.
+
+- Adding SQS to the picture, dictates that we potentially need to face possible duplicated messages(Due to SQS
+  distributed nature, it follows a delivery "at least once", but could be more than one)
+
+- Noise in the SNS topic. The source of event were all the subfolders of a specific bucket.
+  There were many irrelevant events. The solution is based on s3 filtering of events based on its path.
