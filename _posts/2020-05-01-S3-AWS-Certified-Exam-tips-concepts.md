@@ -1,6 +1,6 @@
 ---
 layout: post
-title: aws s3 - 101 - summary concepts for  aws certification exam
+title: s3 storage service -  aws certification exam tips concepts
 tags: [aws, s3, storage, certification solutions architect]
 ---
 
