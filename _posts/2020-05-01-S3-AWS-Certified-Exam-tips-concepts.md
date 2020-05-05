@@ -4,6 +4,8 @@ title: s3 storage service -  aws certification exam tips concepts
 tags: [aws, s3, storage, certification solutions architect]
 ---
 
+![_config.yml]({{ site.baseurl }}/images/S3-MAIN.png)
+
 In case you are thinking on passing the aws solutions architect exam these notes
 are a quick summary on some of the basic s3 concepts you would need to be familiar with.
 
