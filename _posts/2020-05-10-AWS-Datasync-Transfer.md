@@ -1,12 +1,12 @@
 ---
 layout: post
-title: Datasync transfer service
+title: AWS Datasync Transfer service
 tags: [aws, transfer, datasync, certification solutions architect]
 ---
 
 ![_config.yml]({{ site.baseurl }}/images/DATASYNC-MAIN.png)
 
-# What is DataSync
+# What is AWS DataSync
 
 Datasync uses agents in order to transfer big amounts of data across different locations.
 Each agent uses tasks to perform the transfer and history of executions is attached to each task.
@@ -47,9 +47,9 @@ Once we have our agent we can start creating tasks, choosing our source and targ
 Imagine from example using a S3 source bucket and as destination an EFS mounted as we described
 previously. Nothing of this is possible while the agent is Offline.
 
-We can submit multiple tasks to a single agent, and take benefit of a FIFO like queueing approach.
+We can submit multiple tasks to a single agent, and take benefit of a FIFO like queueing approach
 
-# Tasks and executions
+# Tasks and executions
 
 Tasks goes through different states
 
@@ -99,4 +99,4 @@ As any other service, cloudwatch log groups keep track of Datasync activity
 - Data Migration
 - Data replication / Incremental transfer
 - Centralized resources
-- Transfer of large datasets (media files
+- Transfer of large datasets (media files)
