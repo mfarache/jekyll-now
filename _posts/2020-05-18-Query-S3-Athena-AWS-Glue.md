@@ -34,9 +34,7 @@ those information silos or enterprise data lakes where analytics processing need
 
 Considering that S3 is extremely cheap, we will see show how quick we can turn a bucket into a source of information for our business queries without having to worry about adding some RDS stack or NoSql solution to our architecture.
 
-If we were handling tons of data the first thing to reconsider is the format.
-
-Instead of JSON we could use Parquet which is optimized columnar format easier to compress and query results are much faster. I will let the reader to explore that option ;)
+If we were handling tons of data the first thing to reconsider is the format. Instead of JSON we could use Parquet which is optimized columnar format easier to compress and query results are much faster. I will let the reader to explore that option ;)
 
 If you do not want to query the data yourself there are out of the box integration with your favourite BI provider ( Tableau, Microsoft Power Bi, etc) and obviosly the one from AWS (Amazon
 QuickSight)
@@ -69,14 +67,15 @@ Using AWS Athena you need to select a workgroup or create a new one.
 
 # Create a database
 
-Using AWS Glue you can create a database, which simply requires a name
-Let's name it "sample_db"
+Using AWS Glue you can create a database, which simply requires a name. Let's name it "sample_db"
 
 # Create a table
 
-Using AWS Glue you can create a table using the UI, navigating to
+Using AWS Glue you can create a table using the UI:
 
-Databases / Tables / Add Tables
+```
+Navigate to : Databases > Tables > Add Tables
+```
 
 You need to enter
 
@@ -137,11 +136,10 @@ If you get your results nicely formatted that is all you need to start querying 
 
 NOTE: If you stumble with error feedback from UI console such as:
 
-````
+```
 HIVE_CURSOR_ERROR: Row is not a valid JSON Object - JSONException: A JSONObject text must end with '}' at 2 [character 3 line 1]
 ```
 
 Review your JSON file in S3.
 It's very important the file is in a single line, no EOL characters or anything ...otherwise you will be banging your head as I did till I found this valuable link:
 https://aws.amazon.com/premiumsupport/knowledge-center/error-json-athena/
-````
