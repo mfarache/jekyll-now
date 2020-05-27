@@ -23,12 +23,13 @@ Initially we planned to register fresh new domains using Route53, but eventually
 
 Regardless of such decision, I will describe some concepts in the context of Route53 that can be extended to other DNS providers, as is probably useful for getting understanding on how it works.
 
-1. Route53 allows one to create a DNS hosted Zone. We can chose its custom domain name and whether is public or private VPC. It will create Record set, mainly one of type NS and other of type SOA. We are interesting on the NS record, each of the entries is a name server. If we plan to register our domain we need those values handy.
+- Route53 allows one to create a DNS hosted Zone. We can chose its custom domain name and whether is public or private VPC. It will create Record set, mainly one of type NS and other of type SOA. We are interesting on the NS record, each of the entries is a name server. If we plan to register our domain we need those values handy.
 
-2. Route 53 also enables configuring new domains from scratch.
-   Chose your name and type (.com, .uk, .es, etc) and after a shopping-cart-like process and verification on emails you will be getting your domain per one year.
+- Route 53 also enables configuring new domains from scratch. Chose your name and type (.com, .uk, .es, etc) and after a shopping-cart-like process and verification on emails you will be getting your domain per one year.
 
-3. Route53 acts as a proper DNS so you can create records to cover different needs. Several examples that come to mind:
+- Route53 acts as a proper DNS so you can create records to cover different needs. Several examples that come to mind:
+
+So what kind of records can we create with DNS records?
 
 - Hosting a webserver in a EC2 instance with a fix elastc ip adress. We would need to create a record that will route any request to domain to beforwarded to our ec2 instance. Other scenarios are
 - Creation of A record from www.mydomain.com , using no Alias to be routed to our IPv4 Address
@@ -62,7 +63,7 @@ If we want to have subdomains we can also set those specific ones or use wildcar
 
 Once we have our domains we need to validate them. Certificate can be validated in two different ways
 
-- We can chose email validation only if we fully own the domains
+- We can chose email validation, only a valid option if we fully own the domains
 - We can chose DNS Validation - By setting a DNS record.
 
 AWS will suggest some CNAMES record that need to be introduced (One per domain)
@@ -100,9 +101,7 @@ www.myfriendlydomain.com CNAME <target-endpoint>
 
 If you followed the steps you have realized that both domain registration and issuing certificates require certain manual validations so they are not good candidates to be automated. However we can automate the creation of custom domains.
 
-We use Serverless framework to deploy anything AWS related, so a natural choice is simply find for the existance of any plugin that can do easily the job. Amplify provides a promising plugin
-
-https://github.com/amplify-education/serverless-domain-manager
+We use Serverless framework to deploy anything AWS related, so a natural choice is simply find for the existance of any plugin that can do easily the job. Amplify provides [a promising plugin][1]
 
 The plugin looks awesome as will help us to create custom domain names, create optional Route53 records and link with the certificates.
 
@@ -115,7 +114,7 @@ This totally defeats the purpose as we do not want to change DNS everytime the s
 
 Are there better ways? Yes!!!!
 
-Luckily we came with an hybrid approach, ruling out the usage of the plugin in favour of plain CloudFormation resources.
+Luckily we came with an hybrid approach, ruling out the usage of the plugin itself in favour of plain CloudFormation resources deliveried via serverless.
 
 I will provide some context to understand our proyect layout.
 
@@ -161,4 +160,8 @@ DomainNameMapping:
         Stage: ${self:custom.stage}
 ```
 
-So now no matter how many times we redeploy or remove stack from service A or B, the only thing that would be redeploying a mapping resource which does not impact.
+So now, no matter how many times we redeploy or we remove stack from service A or B, those changes will
+not impact our service because eventually the mapping points to
+the same domain and is unlikely to change once has been setup
+
+[1]: https://github.com/amplify-education/serverless-domain-manager
